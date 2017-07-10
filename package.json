@@ -1,0 +1,25 @@
+{
+  "name": "homebridge-homee",
+  "version": "0.0.1",
+  "description": "Homee platform plugin for homebridge: https://github.com/nfarina/homebridge",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin", "homee"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stfnhmplr/homebridge-homee.git"
+  },
+  "bugs": {
+    "url": "http://github.com/stfnhmplr/homebridge-homee/issues"
+  },
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "dependencies": {
+    "crypto-toolkit": "^1.0.0",
+    "request": "^2.79.0",
+    "ws": "^1.1.1"
+  }
+}

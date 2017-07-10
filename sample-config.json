@@ -1,0 +1,19 @@
+{
+    "bridge": {
+        "name": "Homebridge",
+        "username": "CC:22:3D:E3:CE:51",
+        "port": 51826,
+        "pin": "031-45-154"
+    },
+    "description": "This is an example configuration file for the homebridge-homee plugin",
+    "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",
+    "platforms": [
+        {
+            "accessory": "Homee",
+            "name": "Homee",
+            "ip": "192.168.178.1",
+            "user": "your-username",
+            "pass": "your-password"
+        }
+    ]
+}
