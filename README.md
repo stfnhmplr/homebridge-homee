@@ -28,9 +28,9 @@ Example:
         "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",
         "platforms": [
             {
-                "accessory": "Homee",
+                "platform": "Homee",
                 "name": "Homee",
-                "ip": "192.168.178.1",
+                "host": "192.168.178.1",
                 "user": "your-username",
                 "pass": "your-password"
             }
