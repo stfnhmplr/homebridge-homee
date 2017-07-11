@@ -1,0 +1,105 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node', '/usr/local/bin/npm', 'publish' ]
+2 info using npm@3.8.6
+3 info using node@v6.0.0
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/Users/Stefan/projects/homebridge/node_modules/homebridge-homee',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory /Users/Stefan/.npm/homebridge-homee/0.0.2/package.tgz not in flight; packing
+9 verbose correctMkdir /Users/Stefan/.npm correctMkdir not in flight; initializing
+10 info lifecycle homebridge-homee@0.0.2~prepublish: homebridge-homee@0.0.2
+11 silly lifecycle homebridge-homee@0.0.2~prepublish: no script for prepublish, continuing
+12 verbose tar pack [ '/Users/Stefan/.npm/homebridge-homee/0.0.2/package.tgz',
+12 verbose tar pack   '/Users/Stefan/projects/homebridge/node_modules/homebridge-homee' ]
+13 verbose tarball /Users/Stefan/.npm/homebridge-homee/0.0.2/package.tgz
+14 verbose folder /Users/Stefan/projects/homebridge/node_modules/homebridge-homee
+15 verbose addLocalTarball adding from inside cache /Users/Stefan/.npm/homebridge-homee/0.0.2/package.tgz
+16 verbose correctMkdir /Users/Stefan/.npm correctMkdir not in flight; initializing
+17 silly cache afterAdd homebridge-homee@0.0.2
+18 verbose afterAdd /Users/Stefan/.npm/homebridge-homee/0.0.2/package/package.json not in flight; writing
+19 verbose correctMkdir /Users/Stefan/.npm correctMkdir not in flight; initializing
+20 verbose afterAdd /Users/Stefan/.npm/homebridge-homee/0.0.2/package/package.json written
+21 silly publish { name: 'homebridge-homee',
+21 silly publish   version: '0.0.2',
+21 silly publish   description: 'Homee platform plugin for homebridge: https://github.com/nfarina/homebridge',
+21 silly publish   license: 'MIT',
+21 silly publish   keywords: [ 'homebridge-plugin', 'homee' ],
+21 silly publish   repository:
+21 silly publish    { type: 'git',
+21 silly publish      url: 'git://github.com/stfnhmplr/homebridge-homee.git' },
+21 silly publish   bugs: { url: 'http://github.com/stfnhmplr/homebridge-homee/issues' },
+21 silly publish   engines: { node: '>=0.12.0', homebridge: '>=0.2.0' },
+21 silly publish   dependencies: { 'crypto-toolkit': '^1.0.0', request: '^2.79.0', ws: '^1.1.1' },
+21 silly publish   readme: '** work in progress **\n\n# Homebridge-Homee\n\n[![Package Quality](http://npm.packagequality.com/shield/homebridge-homee.svg)](http://packagequality.com/#?package=homebridge-homee)\n\nHomee platform plugin for homebridge: https://github.com/nfarina/homebridge\n\n## Installation\nFollow the instruction in [NPM](https://www.npmjs.com/package/homebridge) for the homebridge server installation. The plugin is published through [NPM](https://www.npmjs.com/package/homebridge-homee) and should be installed "globally" by typing:\n\n    sudo npm install -g homebridge-homee\n\n## Configuration\n\nconfig.json\n\nExample:\n\n    {\n        "bridge": {\n            "name": "Homebridge",\n            "username": "CC:22:3D:E3:CE:51",\n            "port": 51826,\n            "pin": "031-45-154"\n        },\n        "description": "This is an example configuration file for the homebridge-homee plugin",\n        "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",\n        "platforms": [\n            {\n                "platform": "Homee",\n                "name": "Homee",\n                "host": "192.168.178.1",\n                "user": "your-username",\n                "pass": "your-password"\n            }\n        ]\n    }\n\n\n## tested devices\n- Devolo Window/Door Sensor\n- Danfoss Living connect Thermostat\n- Fibaro Motion Sensor\n- Fibaro Door/Window Sensor\n',
+21 silly publish   readmeFilename: 'README.md',
+21 silly publish   gitHead: '86d633f4308f0640ab2abd6d74f40a507d6d0d9b',
+21 silly publish   homepage: 'https://github.com/stfnhmplr/homebridge-homee#readme',
+21 silly publish   _id: 'homebridge-homee@0.0.2',
+21 silly publish   scripts: {},
+21 silly publish   _shasum: 'b90b72ecd8e6e159fc5a404643d93bddd63462c9',
+21 silly publish   _from: '.' }
+22 verbose getPublishConfig undefined
+23 silly mapToRegistry name homebridge-homee
+24 silly mapToRegistry using default registry
+25 silly mapToRegistry registry http://registry.npmjs.org/
+26 silly mapToRegistry data Result {
+26 silly mapToRegistry   raw: 'homebridge-homee',
+26 silly mapToRegistry   scope: null,
+26 silly mapToRegistry   name: 'homebridge-homee',
+26 silly mapToRegistry   rawSpec: '',
+26 silly mapToRegistry   spec: 'latest',
+26 silly mapToRegistry   type: 'tag' }
+27 silly mapToRegistry uri http://registry.npmjs.org/homebridge-homee
+28 verbose publish registryBase http://registry.npmjs.org/
+29 silly publish uploading /Users/Stefan/.npm/homebridge-homee/0.0.2/package.tgz
+30 verbose request uri http://registry.npmjs.org/homebridge-homee
+31 verbose request sending authorization for write operation
+32 info attempt registry request try #1 at 22:29:17
+33 verbose request using bearer token for auth
+34 verbose request id d53c98ddba4b8e31
+35 http request PUT http://registry.npmjs.org/homebridge-homee
+36 http 403 http://registry.npmjs.org/homebridge-homee
+37 verbose headers { 'content-type': 'application/json',
+37 verbose headers   'cache-control': 'max-age=300',
+37 verbose headers   'content-length': '95',
+37 verbose headers   'accept-ranges': 'bytes',
+37 verbose headers   date: 'Tue, 11 Jul 2017 20:29:18 GMT',
+37 verbose headers   via: '1.1 varnish',
+37 verbose headers   connection: 'keep-alive',
+37 verbose headers   'x-served-by': 'cache-hhn1535-HHN',
+37 verbose headers   'x-cache': 'MISS',
+37 verbose headers   'x-cache-hits': '0',
+37 verbose headers   'x-timer': 'S1499804957.130770,VS0,VE1397',
+37 verbose headers   vary: 'Accept-Encoding, Accept' }
+38 verbose request invalidating /Users/Stefan/.npm/registry.npmjs.org/homebridge-homee on PUT
+39 error publish Failed PUT 403
+40 verbose stack Error: "You cannot publish over the previously published version 0.0.2." : homebridge-homee
+40 verbose stack     at makeError (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+40 verbose stack     at CachingRegistryClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:252:14)
+40 verbose stack     at Request._callback (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+40 verbose stack     at Request.self.callback (/usr/local/lib/node_modules/npm/node_modules/request/request.js:199:22)
+40 verbose stack     at emitTwo (events.js:106:13)
+40 verbose stack     at Request.emit (events.js:191:7)
+40 verbose stack     at Request.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1036:10)
+40 verbose stack     at emitOne (events.js:101:20)
+40 verbose stack     at Request.emit (events.js:188:7)
+40 verbose stack     at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:963:12)
+41 verbose statusCode 403
+42 verbose pkgid homebridge-homee
+43 verbose cwd /Users/Stefan/projects/homebridge/node_modules/homebridge-homee
+44 error Darwin 16.6.0
+45 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "publish"
+46 error node v6.0.0
+47 error npm  v3.8.6
+48 error code E403
+49 error "You cannot publish over the previously published version 0.0.2." : homebridge-homee
+50 error If you need help, you may report this error at:
+50 error     <https://github.com/npm/npm/issues>
+51 verbose exit [ 1, true ]
