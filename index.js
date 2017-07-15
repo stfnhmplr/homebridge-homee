@@ -28,10 +28,6 @@ function HomeePlatform(log, config, api) {
         .connect()
         .then(() => {
             that.log("connected to homee");
-            that.homee.listen(message => {
-                //do something
-                //update stats
-            });
         })
         .catch(err => {
             that.log(err);
