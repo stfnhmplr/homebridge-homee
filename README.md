@@ -39,7 +39,12 @@ Example:
 
 
 ## tested devices
-- Devolo Window/Door Sensor
 - Danfoss Living connect Thermostat
-- Fibaro Motion Sensor
+- Devolo Door/Window Sensor
+- Devolo Heizkörperthermostate
 - Fibaro Door/Window Sensor
+- Fibaro Motion Sensor
+- Fibaro Smoke Sensor 2
+- Fibaro Wall Plug
+- Greenwave Powernode
+- Popp Rauchwarnmelder mit Sirene
