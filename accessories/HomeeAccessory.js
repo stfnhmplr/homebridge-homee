@@ -10,18 +10,6 @@ function HomeeAccessory(name, uuid, profile, node, platform) {
     this.attributes = node.attributes;
     this.editableAttributes = [];
     this.map = {};
-
-    let that = this;
-
-    this.platform.homee.listen(message => {
-        if (message.attribute || message.node) {
-            let attributes = message.node ? message.node.attributes : [message.attribute];
-
-            attributes.forEach(function (attribute) {
-                that._updateValue(attribute);
-            })
-        }
-    });
 }
 
 HomeeAccessory.prototype.getValue = function (callback) {
@@ -46,7 +34,7 @@ HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, at
     callback(null, value);
 }
 
-HomeeAccessory.prototype._updateValue = function (attribute) {
+HomeeAccessory.prototype.updateValue = function (attribute) {
     var that = this;
 
     if (that.service && attribute.id in that.map) {

@@ -21,6 +21,7 @@ function HomeePlatform(log, config, api) {
     this.homee = new Homee(config.host, config.user, config.pass);
     this.nodes = [];
     this.foundAccessories = [];
+    this.attempts = 0;
 
     const that = this;
 
@@ -28,6 +29,20 @@ function HomeePlatform(log, config, api) {
         .connect()
         .then(() => {
             that.log("connected to homee");
+            that.homee.listen(message => {
+                if (message.attribute || message.node) {
+                    let attributes = message.node ? message.node.attributes : [message.attribute];
+
+                    attributes.forEach((attribute) => {
+                        for (let i=0; i<that.foundAccessories.length; i++) {
+                            const accessory = that.foundAccessories[i];
+                            if (accessory.nodeId === attribute.node_id) {
+                                accessory.updateValue(attribute);
+                            }
+                        }
+                    })
+                }
+            });
         })
         .catch(err => {
             that.log(err);
@@ -41,8 +56,16 @@ function HomeePlatform(log, config, api) {
 HomeePlatform.prototype.accessories = function(callback) {
     let that = this;
 
+    if(that.attempts > 5) {
+        that.log("Can't connect to homee...")
+        callback([]);
+        return;
+    }
+
+    that.attempts++;
+
     if (!that.homee.connected) {
-        that.log("Failed getting devices. Retrying...");
+        that.log("Not connected to homee. Retrying...");
         setTimeout(() => {
             that.accessories(callback);
         }, 2000);
