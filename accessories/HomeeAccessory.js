@@ -52,7 +52,6 @@ HomeeAccessory.prototype._updateValue = function (attribute) {
     if (that.service && attribute.id in that.map) {
 
         let attributeType = attributeTypes.find(x => x.id === attribute.type).hap_type;
-        that.value = attribute.current_value;
 
         that.service.getCharacteristic(that.map[attribute.id])
         .updateValue(that.value, null, 'ws');
@@ -75,7 +74,8 @@ HomeeAccessory.prototype.getServices = function () {
     for (let i=0; i<this.attributes.length; i++) {
         let that = this;
 
-        let attributeType = attributeTypes.find(x => x.id === this.attributes[i].type).hap_type;
+        let attributeType = attributeTypes.find(x => x.id === this.attributes[i].type);
+        if (attributeType) attributeType = attributeType.hap_type;
         let attributeId = this.attributes[i].id;
 
         if (attributeType) {

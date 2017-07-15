@@ -58,7 +58,7 @@ HomeePlatform.prototype.accessories = function(callback) {
                 if (message.nodes[i].id < 1) continue;
 
                 let name = decodeURI(message.nodes[i].name);
-                let uuid = UUIDGen.generate(name);
+                let uuid = UUIDGen.generate(name + '-' + message.nodes[i].id);
                 let newAccessory = '';
                 let nodeType = nodeTypes.find(x => x.id === message.nodes[i].profile).accessory;
 
