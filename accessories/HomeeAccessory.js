@@ -52,11 +52,12 @@ HomeeAccessory.prototype._updateValue = function (attribute) {
     if (that.service && attribute.id in that.map) {
 
         let attributeType = attributeTypes.find(x => x.id === attribute.type).hap_type;
+        let value = attribute.current_value;
 
         that.service.getCharacteristic(that.map[attribute.id])
-        .updateValue(that.value, null, 'ws');
+        .updateValue(value, null, 'ws');
 
-        that.log(that.name + ': ' + attributeType + ': ' + that.value);
+        that.log(that.name + ': ' + attributeType + ': ' + value);
     }
 }
 
