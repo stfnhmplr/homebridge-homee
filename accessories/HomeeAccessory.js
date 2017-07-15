@@ -35,9 +35,12 @@ HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, at
 	    return;
 	}
 
-    this.log('Setting ' +this.name+ ' to ' +value);
+    if (value === true) value = 1;
+    if (value === false) value = 0;
+
+    this.log('Setting ' + this.name + ' to ' + value);
     this.platform.homee.send(
-        'PUT:/nodes/' +this.nodeId+ '/attributes/' +attributeId+ '?target_value=' +value
+        'PUT:/nodes/' + this.nodeId + '/attributes/' + attributeId + '?target_value=' + value
     );
 
     callback(null, value);
