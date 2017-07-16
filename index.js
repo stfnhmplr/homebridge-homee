@@ -56,7 +56,7 @@ function HomeePlatform(log, config, api) {
 HomeePlatform.prototype.accessories = function(callback) {
     let that = this;
 
-    if(that.attempts > 5) {
+    if (that.attempts > 5) {
         that.log("Can't connect to homee...")
         callback([]);
         return;
@@ -83,11 +83,11 @@ HomeePlatform.prototype.accessories = function(callback) {
                 let name = decodeURI(message.nodes[i].name);
                 let uuid = UUIDGen.generate(name + '-' + message.nodes[i].id);
                 let newAccessory = '';
-                let nodeType = nodeTypes.find(x => x.id === message.nodes[i].profile).accessory;
+                let nodeType = nodeTypes.find(x => x.id === message.nodes[i].profile);
 
-                if (nodeType) {
+                if (nodeType && nodeType.accessory) {
                     that.log(name + ': ' + nodeType);
-                    newAccessory = new HomeeAccessory(name, uuid, nodeType, message.nodes[i], that);
+                    newAccessory = new HomeeAccessory(name, uuid, nodeType.accessory, message.nodes[i], that);
                 } else {
                     that.log(name + ': unknown Accessory Type');
                 }
