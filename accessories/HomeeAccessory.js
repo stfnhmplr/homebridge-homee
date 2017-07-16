@@ -12,11 +12,6 @@ function HomeeAccessory(name, uuid, profile, node, platform) {
     this.map = {};
 }
 
-HomeeAccessory.prototype.getValue = function (callback) {
-    this.platform.homee.send('GET:nodes/' + this.nodeId)
-    callback(null);
-}
-
 HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, attributeId) {
     if (context && context == 'ws') {
 		callback(null, value);
@@ -76,8 +71,7 @@ HomeeAccessory.prototype.getServices = function () {
             }
 
             this.service.getCharacteristic(Characteristic[attributeType])
-            .updateValue(this.attributes[i].current_value)
-            .on('get', this.getValue.bind(this));
+            .updateValue(this.attributes[i].current_value);
 
             if (this.attributes[i].editable) {
                 this.service.getCharacteristic(Characteristic[attributeType])
