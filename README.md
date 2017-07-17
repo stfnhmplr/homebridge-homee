@@ -41,10 +41,14 @@ Example:
 ## tested devices
 - Danfoss Living connect Thermostat
 - Devolo Door/Window Sensor
+- Devolo Motion Sensor
 - Devolo Heizkörperthermostate
+- Devolo Smart Metering Plug
 - Fibaro Door/Window Sensor
 - Fibaro Motion Sensor
 - Fibaro Smoke Sensor 2
 - Fibaro Wall Plug
 - Greenwave Powernode
+- Philips Hue White and Color Ambiance
+- Philips Hue White
 - Popp Rauchwarnmelder mit Sirene
