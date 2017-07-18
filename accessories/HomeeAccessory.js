@@ -10,23 +10,6 @@ function HomeeAccessory(name, uuid, profile, node, platform) {
     this.attributes = node.attributes;
     this.editableAttributes = [];
     this.map = {};
-
-    let that = this;
-
-    this.platform.homee.listen(message => {
-        if (message.attribute || message.node) {
-            let attributes = message.node ? message.node.attributes : [message.attribute];
-
-            attributes.forEach(function (attribute) {
-                that._updateValue(attribute);
-            })
-        }
-    });
-}
-
-HomeeAccessory.prototype.getValue = function (callback) {
-    this.platform.homee.send('GET:nodes/' + this.nodeId)
-    callback(null);
 }
 
 HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, attributeId) {
@@ -38,7 +21,7 @@ HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, at
     if (value === true) value = 1;
     if (value === false) value = 0;
 
-    this.log('Setting ' + this.name + ' to ' + value);
+    if (this.platform.debug) this.log('Setting ' + this.name + ' to ' + value);
     this.platform.homee.send(
         'PUT:/nodes/' + this.nodeId + '/attributes/' + attributeId + '?target_value=' + value
     );
@@ -46,18 +29,22 @@ HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, at
     callback(null, value);
 }
 
-HomeeAccessory.prototype._updateValue = function (attribute) {
+HomeeAccessory.prototype.updateValue = function (attribute) {
     var that = this;
 
     if (that.service && attribute.id in that.map) {
 
         let attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
-        let value = attribute.current_value;
+        let newValue = attribute.current_value;
+        let oldValue = that.service.getCharacteristic(that.map[attribute.id]).value;
+        let targetValue = attribute.target_value;
 
-        that.service.getCharacteristic(that.map[attribute.id])
-        .updateValue(value, null, 'ws');
+        if(newValue!==oldValue && newValue===targetValue) {
+            that.service.getCharacteristic(that.map[attribute.id])
+            .updateValue(newValue, null, 'ws');
 
-        that.log(that.name + ': ' + attributeType + ': ' + value);
+            if (that.platform.debug) that.log(that.name + ': ' + attributeType + ': ' + newValue);
+        }
     }
 }
 
@@ -79,7 +66,7 @@ HomeeAccessory.prototype.getServices = function () {
         let attributeId = this.attributes[i].id;
 
         if (attributeType) {
-            this.log(attributeType + ': ' + this.attributes[i].current_value);
+            if (this.platform.debug) this.log(attributeType + ': ' + this.attributes[i].current_value);
             this.map[this.attributes[i].id] = Characteristic[attributeType];
 
             if (!this.service.getCharacteristic(Characteristic[attributeType])) {
@@ -87,8 +74,7 @@ HomeeAccessory.prototype.getServices = function () {
             }
 
             this.service.getCharacteristic(Characteristic[attributeType])
-            .updateValue(this.attributes[i].current_value)
-            .on('get', this.getValue.bind(this));
+            .updateValue(this.attributes[i].current_value);
 
             if (this.attributes[i].editable) {
                 this.service.getCharacteristic(Characteristic[attributeType])

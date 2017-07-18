@@ -32,14 +32,24 @@ Example:
                 "name": "Homee",
                 "host": "192.168.178.1",
                 "user": "your-username",
-                "pass": "your-password"
+                "pass": "your-password",
+                "debug": true //optional, default is false
             }
         ]
     }
 
 
 ## tested devices
-- Devolo Window/Door Sensor
 - Danfoss Living connect Thermostat
-- Fibaro Motion Sensor
+- Devolo Door/Window Sensor
+- Devolo Motion Sensor
+- Devolo Heizkörperthermostate
+- Devolo Smart Metering Plug
 - Fibaro Door/Window Sensor
+- Fibaro Motion Sensor
+- Fibaro Smoke Sensor 2
+- Fibaro Wall Plug
+- Greenwave Powernode
+- Philips Hue White and Color Ambiance
+- Philips Hue White
+- Popp Rauchwarnmelder mit Sirene
