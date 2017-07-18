@@ -1,5 +1,3 @@
-** work in progress **
-
 # Homebridge-Homee
 
 [![Package Quality](http://npm.packagequality.com/shield/homebridge-homee.svg)](http://packagequality.com/#?package=homebridge-homee)
@@ -33,13 +31,15 @@ Example:
                 "host": "192.168.178.1",
                 "user": "your-username",
                 "pass": "your-password",
-                "debug": true //optional, default is false
+                "debug": true //optional, enable debug mode
             }
         ]
     }
 
+## Exclude nodes
+This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in Homee and add all the devices you want to use with homebridge. Other devices are then ignored.
 
-## tested devices
+## Tested devices
 - Danfoss Living connect Thermostat
 - Devolo Door/Window Sensor
 - Devolo Motion Sensor
