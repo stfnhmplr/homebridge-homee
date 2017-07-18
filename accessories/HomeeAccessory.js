@@ -35,12 +35,16 @@ HomeeAccessory.prototype.updateValue = function (attribute) {
     if (that.service && attribute.id in that.map) {
 
         let attributeType = attributeTypes.find(x => x.id === attribute.type).hap_type;
-        let value = attribute.current_value;
+        let newValue = attribute.current_value;
+        let oldValue = that.service.getCharacteristic(that.map[attribute.id]).value;
+        let targetValue = attribute.target_value;
 
-        that.service.getCharacteristic(that.map[attribute.id])
-        .updateValue(value, null, 'ws');
+        if(newValue!==oldValue && newValue===targetValue) {
+            that.service.getCharacteristic(that.map[attribute.id])
+            .updateValue(newValue, null, 'ws');
 
-        that.log(that.name + ': ' + attributeType + ': ' + value);
+            that.log(that.name + ': ' + attributeType + ': ' + newValue);
+        }
     }
 }
 
