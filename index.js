@@ -60,7 +60,7 @@ HomeePlatform.prototype.accessories = function(callback) {
                 let name = decodeURI(message.nodes[i].name);
                 let uuid = UUIDGen.generate(name + '-' + message.nodes[i].id);
                 let newAccessory = '';
-                let nodeType = nodeTypes.find(x => x.id === message.nodes[i].profile).accessory;
+                let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(message.nodes[i].profile);
 
                 if (nodeType) {
                     that.log(name + ': ' + nodeType);
