@@ -32,7 +32,8 @@ Example:
                 "name": "Homee",
                 "host": "192.168.178.1",
                 "user": "your-username",
-                "pass": "your-password"
+                "pass": "your-password",
+                "debug": true //optional, default is false
             }
         ]
     }

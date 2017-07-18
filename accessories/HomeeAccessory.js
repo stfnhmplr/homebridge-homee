@@ -21,7 +21,7 @@ HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, at
     if (value === true) value = 1;
     if (value === false) value = 0;
 
-    this.log('Setting ' + this.name + ' to ' + value);
+    if (this.platform.debug) this.log('Setting ' + this.name + ' to ' + value);
     this.platform.homee.send(
         'PUT:/nodes/' + this.nodeId + '/attributes/' + attributeId + '?target_value=' + value
     );
@@ -43,7 +43,7 @@ HomeeAccessory.prototype.updateValue = function (attribute) {
             that.service.getCharacteristic(that.map[attribute.id])
             .updateValue(newValue, null, 'ws');
 
-            that.log(that.name + ': ' + attributeType + ': ' + newValue);
+            if (that.platform.debug) that.log(that.name + ': ' + attributeType + ': ' + newValue);
         }
     }
 }
@@ -67,7 +67,7 @@ HomeeAccessory.prototype.getServices = function () {
         let attributeId = this.attributes[i].id;
 
         if (attributeType) {
-            this.log(attributeType + ': ' + this.attributes[i].current_value);
+            if (this.platform.debug) this.log(attributeType + ': ' + this.attributes[i].current_value);
             this.map[this.attributes[i].id] = Characteristic[attributeType];
 
             if (!this.service.getCharacteristic(Characteristic[attributeType])) {

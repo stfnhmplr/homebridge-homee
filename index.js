@@ -19,6 +19,7 @@ module.exports = function(homebridge) {
 function HomeePlatform(log, config, api) {
     this.log = log;
     this.homee = new Homee(config.host, config.user, config.pass);
+    this.debug = config.debug || false;
     this.nodes = [];
     this.foundAccessories = [];
     this.attempts = 0;
@@ -28,7 +29,7 @@ function HomeePlatform(log, config, api) {
     that.homee
         .connect()
         .then(() => {
-            that.log("connected to homee");
+            if (that.debug) that.log("connected to homee");
             that.homee.listen(message => {
                 if (message.attribute || message.node) {
                     let attributes = message.node ? message.node.attributes : [message.attribute];
@@ -57,7 +58,7 @@ HomeePlatform.prototype.accessories = function(callback) {
     let that = this;
 
     if (that.attempts > 5) {
-        that.log("Can't connect to homee...")
+        if (that.debug) that.log("Can't connect to homee...")
         callback([]);
         return;
     }
@@ -65,7 +66,7 @@ HomeePlatform.prototype.accessories = function(callback) {
     that.attempts++;
 
     if (!that.homee.connected) {
-        that.log("Not connected to homee. Retrying...");
+        if (that.debug) that.log("Not connected to homee. Retrying...");
         setTimeout(() => {
             that.accessories(callback);
         }, 2000);
@@ -86,10 +87,10 @@ HomeePlatform.prototype.accessories = function(callback) {
                 let nodeType = nodeTypes.find(x => x.id === message.nodes[i].profile);
 
                 if (nodeType && nodeType.accessory) {
-                    that.log(name + ': ' + nodeType);
+                    if (that.debug) that.log(name + ': ' + nodeType.accessory);
                     newAccessory = new HomeeAccessory(name, uuid, nodeType.accessory, message.nodes[i], that);
                 } else {
-                    that.log(name + ': unknown Accessory Type');
+                    if (that.debug) that.log(name + ': unknown Accessory Type');
                 }
 
                 if (newAccessory) {
