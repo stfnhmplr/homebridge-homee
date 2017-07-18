@@ -84,11 +84,11 @@ HomeePlatform.prototype.accessories = function(callback) {
                 let name = decodeURI(message.nodes[i].name);
                 let uuid = UUIDGen.generate(name + '-' + message.nodes[i].id);
                 let newAccessory = '';
-                let nodeType = nodeTypes.find(x => x.id === message.nodes[i].profile);
+                let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(message.nodes[i].profile);
 
-                if (nodeType && nodeType.accessory) {
-                    if (that.debug) that.log(name + ': ' + nodeType.accessory);
-                    newAccessory = new HomeeAccessory(name, uuid, nodeType.accessory, message.nodes[i], that);
+                if (nodeType) {
+                    if (that.debug) that.log(name + ': ' + nodeType);
+                    newAccessory = new HomeeAccessory(name, uuid, nodeType, message.nodes[i], that);
                 } else {
                     if (that.debug) that.log(name + ': unknown Accessory Type');
                 }
