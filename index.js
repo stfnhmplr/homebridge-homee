@@ -82,7 +82,7 @@ HomeePlatform.prototype.accessories = function(callback) {
         if (that.nodes[i].id < 1) continue;
 
         let name = decodeURI(that.nodes[i].name);
-        let uuid = UUIDGen.generate(name + '-' + that.nodes[i].id);
+        let uuid = UUIDGen.generate('homee-' + that.nodes[i].id);
         let newAccessory = '';
         let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(that.nodes[i].profile);
 
