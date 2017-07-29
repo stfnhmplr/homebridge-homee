@@ -1,8 +1,8 @@
-# Homebridge-Homee
+# Homebridge-homee
 
 [![Package Quality](http://npm.packagequality.com/shield/homebridge-homee.svg)](http://packagequality.com/#?package=homebridge-homee)
 
-Homee platform plugin for homebridge: https://github.com/nfarina/homebridge
+homee platform plugin for homebridge: https://github.com/nfarina/homebridge
 
 ## Installation
 Follow the instruction in [NPM](https://www.npmjs.com/package/homebridge) for the homebridge server installation. The plugin is published through [NPM](https://www.npmjs.com/package/homebridge-homee) and should be installed "globally" by typing:
@@ -27,7 +27,7 @@ Example:
         "platforms": [
             {
                 "platform": "Homee",
-                "name": "Homee",
+                "name": "homee",
                 "host": "192.168.178.1",
                 "user": "your-username",
                 "pass": "your-password",
@@ -37,7 +37,7 @@ Example:
     }
 
 ## Exclude nodes
-This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in Homee and add all the devices you want to use with homebridge. Other devices are then ignored.
+This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in homee and add all the devices you want to use with homebridge. Other devices are then ignored.
 
 ## Tested devices
 - Danfoss Living connect Thermostat
