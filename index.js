@@ -13,7 +13,7 @@ module.exports = function(homebridge) {
 
     HomeeAccessory = require("./accessories/HomeeAccessory.js")(Service, Characteristic);
 
-    homebridge.registerPlatform("homebridge-homee", "Homee", HomeePlatform, false);
+    homebridge.registerPlatform("homebridge-homee", "homee", HomeePlatform, false);
 };
 
 function HomeePlatform(log, config, api) {
