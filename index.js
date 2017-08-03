@@ -3,7 +3,7 @@
 let Accessory, Service, Characteristic, UUIDGen;
 const Homee = require("./lib/homee");
 const nodeTypes = require("./lib/node_types");
-let HomeeAccessory;
+let HomeeAccessory, WindowCoveringAccessory, MultiSwitchAccessory, HomeegramAccessory;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -12,6 +12,9 @@ module.exports = function(homebridge) {
     Accessory = homebridge.platformAccessory;
 
     HomeeAccessory = require("./accessories/HomeeAccessory.js")(Service, Characteristic);
+    MultiSwitchAccessory = require("./accessories/MultiSwitchAccessory.js")(Service, Characteristic);
+    WindowCoveringAccessory = require("./accessories/WindowCoveringAccessory.js")(Service, Characteristic);
+    HomeegramAccessory = require("./accessories/HomeegramAccessory.js")(Service, Characteristic);
 
     homebridge.registerPlatform("homebridge-homee", "homee", HomeePlatform, false);
 };
@@ -21,6 +24,7 @@ function HomeePlatform(log, config, api) {
     this.homee = new Homee(config.host, config.user, config.pass);
     this.debug = config.debug || false;
     this.nodes = [];
+    this.homeegrams = [];
     this.foundAccessories = [];
     this.attempts = 0;
 
@@ -35,7 +39,7 @@ function HomeePlatform(log, config, api) {
 
             that.homee.listen(message => {
                 if (message.all && !that.foundAccessories.length) {
-                    that.nodes = that.filterNodes(message.all);
+                    [that.nodes, that.homeegrams] = that.filterDevices(message.all);
                 } else if (message.attribute || message.node) {
                     let attributes = message.node ? message.node.attributes : [message.attribute];
 
@@ -83,10 +87,17 @@ HomeePlatform.prototype.accessories = function(callback) {
 
         let name = decodeURI(that.nodes[i].name);
         let uuid = UUIDGen.generate('homee-' + that.nodes[i].id);
+        that.log('homee-' + that.nodes[i].id, uuid);
         let newAccessory = '';
         let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(that.nodes[i].profile);
 
-        if (nodeType) {
+        if (nodeType === 'WindowCovering') {
+            if (that.debug) that.log(name + ': ' + nodeType);
+            newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, that.nodes[i], that);
+        } else if (nodeType === 'MultiSwitch') {
+            if (that.debug) that.log(name + ': ' + nodeType);
+            newAccessory = new MultiSwitchAccessory(name, uuid, nodeType, that.nodes[i], that);
+        } else if (nodeType) {
             if (that.debug) that.log(name + ': ' + nodeType);
             newAccessory = new HomeeAccessory(name, uuid, nodeType, that.nodes[i], that);
         } else {
@@ -98,18 +109,29 @@ HomeePlatform.prototype.accessories = function(callback) {
         }
     }
 
+    for (let i = 0; i < that.homeegrams.length; i++) {
+        let name = decodeURI(that.homeegrams[i].name);
+        let uuid = UUIDGen.generate('homee-hg-' + that.homeegrams[i].id);
+        let newAccessory = '';
+
+        if (that.debug) that.log(name + ': Homeegram');
+        newAccessory = new HomeegramAccessory(name, uuid, that.homeegrams[i], that);
+        that.foundAccessories.push(newAccessory);
+    }
+
     callback(that.foundAccessories);
 };
 
 /**
  * filter nodes if group 'homebridge' exists
- * @param  Object all   groups, relationships and nodes
- * @return Array        filtered or all nodes
+ * @param  Object all   groups, relationships, nodes, homeegrams
+ * @return Array   filtered or all nodes and homeegrams
  */
-HomeePlatform.prototype.filterNodes = function (all) {
+HomeePlatform.prototype.filterDevices = function (all) {
     let groupId;
     let nodeIds = [];
-    let filteredNodes = [];
+    let homeegramIds = [];
+    let filtered = {nodes: [], homeegrams: []};
 
     for (let group of all.groups) {
         if (group.name.match(/^homebridge$/i)) {
@@ -117,19 +139,26 @@ HomeePlatform.prototype.filterNodes = function (all) {
         }
     }
 
-    if(!groupId) return all.nodes;
+    if(!groupId) return {nodes: all.nodes, homeegrams: all.homeegrams};
 
     for (let relationship of all.relationships) {
         if (relationship.group_id === groupId) {
             nodeIds.push(relationship.node_id);
+            homeegramIds.push(relationship.homeegram_id);
         }
     }
 
     for (let node of all.nodes) {
         if (nodeIds.indexOf(node.id) !== -1) {
-            filteredNodes.push(node);
+            filtered.nodes.push(node);
         }
     }
 
-    return filteredNodes;
+    for (let homeegram of all.homeegrams) {
+        if (homeegramIds.indexOf(homeegram.id) !== -1) {
+            filtered.homeegrams.push(homeegram);
+        }
+    }
+
+    return [filtered.nodes, filtered.homeegrams];
 }
