@@ -27,7 +27,7 @@ WindowCoveringAccessory.prototype.updateValue = function (attribute) {
             this.attributes.position = attribute;
             this.service.getCharacteristic(Characteristic.CurrentPosition)
                 .updateValue(attribute.current_value, null, 'ws');
-            this.service.getCharactersitic(Charactersitic.TargetPosition)
+            this.service.getCharacteristic(Characteristic.TargetPosition)
                 .updateValue(attribute.target_value, null, 'ws');
             break;
         case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
@@ -37,7 +37,7 @@ WindowCoveringAccessory.prototype.updateValue = function (attribute) {
             break;
     }
 
-    if (that.platform.debug) that.log(that.name + ': ' + attributeType + ': ' + newValue);
+    if (this.platform.debug) this.log(this.name + ': ' + attributeType + ': ' + newValue);
 }
 
 WindowCoveringAccessory.prototype.setTargetPosition = function (value, callback, context) {
