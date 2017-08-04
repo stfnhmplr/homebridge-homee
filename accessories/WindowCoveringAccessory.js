@@ -8,6 +8,7 @@ function WindowCoveringAccessory(name, uuid, profile, node, platform) {
     this.nodeId = node.id;
     this.profile = profile;
     this.attributes = {};
+    this.shutterOrientation = 0;
 
     for (let i=0; i<node.attributes.length; i++) {
         switch (node.attributes[i].type) {
@@ -16,6 +17,9 @@ function WindowCoveringAccessory(name, uuid, profile, node, platform) {
                 break;
             case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
                 this.attributes.upDown = node.attributes[i];
+                break;
+            case ENUMS.CAAttributeTypeShutterOrientation:
+                this.shutterOrientation = attribute.current_value;
                 break;
         }
     }
@@ -34,8 +38,9 @@ WindowCoveringAccessory.prototype.updateValue = function (attribute) {
             break;
         case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
             this.attributes.upDown = attribute;
+            let positions = this.shutterOrientation ? [2,2,2,0,1] : [2,2,2,1,0];
             this.service.getCharacteristic(Characteristic.PositionState)
-                .updateValue([2,2,2,1,0][this.attributes.upDown.current_value], null, 'ws');
+                .updateValue(positions[this.attributes.upDown.current_value], null, 'ws');
             if (this.platform.debug) this.log(this.name + ': PositionState:' + attribute.current_value);
             break;
     }
