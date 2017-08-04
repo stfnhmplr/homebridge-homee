@@ -8,7 +8,7 @@ function WindowCoveringAccessory(name, uuid, profile, node, platform) {
     this.nodeId = node.id;
     this.profile = profile;
     this.attributes = {};
-    this.positions = [2,2,2,1,0];
+    this.positions = [2,2,2,0,1];
 
     for (let i=0; i<node.attributes.length; i++) {
         switch (node.attributes[i].type) {
