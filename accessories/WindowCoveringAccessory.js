@@ -8,7 +8,7 @@ function WindowCoveringAccessory(name, uuid, profile, node, platform) {
     this.nodeId = node.id;
     this.profile = profile;
     this.attributes = {};
-    this.shutterOrientation = 0;
+    this.positions = [2,2,2,1,0];
 
     for (let i=0; i<node.attributes.length; i++) {
         switch (node.attributes[i].type) {
@@ -19,7 +19,7 @@ function WindowCoveringAccessory(name, uuid, profile, node, platform) {
                 this.attributes.upDown = node.attributes[i];
                 break;
             case ENUMS.CAAttributeTypeShutterOrientation:
-                this.shutterOrientation = attribute.current_value;
+                //this.positions = attribute.current_value ? [2,2,2,0,1] : [2,2,2,1,0];
                 break;
         }
     }
@@ -38,9 +38,8 @@ WindowCoveringAccessory.prototype.updateValue = function (attribute) {
             break;
         case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
             this.attributes.upDown = attribute;
-            let positions = this.shutterOrientation ? [2,2,2,0,1] : [2,2,2,1,0];
             this.service.getCharacteristic(Characteristic.PositionState)
-                .updateValue(positions[this.attributes.upDown.current_value], null, 'ws');
+                .updateValue(this.positions[this.attributes.upDown.current_value], null, 'ws');
             if (this.platform.debug) this.log(this.name + ': PositionState:' + attribute.current_value);
             break;
     }
@@ -94,7 +93,7 @@ WindowCoveringAccessory.prototype.getServices = function () {
         .on('set', this.setTargetPosition.bind(this));
 
     this.service.getCharacteristic(Characteristic.PositionState)
-        .updateValue([2,2,2,1,0][this.attributes.upDown.current_value])
+        .updateValue(this.positions[this.attributes.upDown.current_value])
         .on('set', this.setPositionState.bind(this));
 
     return [informationService, this.service];
