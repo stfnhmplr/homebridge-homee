@@ -9,13 +9,13 @@ function WindowCoveringAccessory(name, uuid, profile, node, platform) {
     this.profile = profile;
     this.attributes = {};
 
-    for (attribute in node.attributes) {
-        switch (attribute.type) {
+    for (let i=0; i<node.attributes.length; i++) {
+        switch (node.attributes[i].type) {
             case ENUMS.CAAttributeType.CAAttributeTypePosition:
-                this.attributes.position = attribute;
+                this.attributes.position = node.attributes[i];
                 break;
             case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
-                this.attributes.upDown = attribute;
+                this.attributes.upDown = node.attributes[i];
                 break;
         }
     }
@@ -80,14 +80,14 @@ WindowCoveringAccessory.prototype.getServices = function () {
 
     this.service = new Service.WindowCovering(this.name);
 
-    this.service.getCharacteristics(Characteristic.CurrentPosition)
+    this.service.getCharacteristic(Characteristic.CurrentPosition)
         .updateValue(this.attributes.position.current_value);
 
-    this.service.getCharacteristics(Characteristic.TargetPosition)
+    this.service.getCharacteristic(Characteristic.TargetPosition)
         .updateValue(this.attributes.position.target_value)
         .on('set', this.setTargetPosition.bind(this));
 
-    this.service.getCharacteristics(Characteristic.PositionState)
+    this.service.getCharacteristic(Characteristic.PositionState)
         .updateValue([2,2,2,1,0][this.attributes.upDown.current_value])
         .on('set', this.setPositionState.bind(this));
 
