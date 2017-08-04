@@ -27,17 +27,18 @@ WindowCoveringAccessory.prototype.updateValue = function (attribute) {
             this.attributes.position = attribute;
             this.service.getCharacteristic(Characteristic.CurrentPosition)
                 .updateValue(attribute.current_value, null, 'ws');
+            if (this.platform.debug) this.log(this.name + ': CurrentPosition:' + attribute.current_value);
             this.service.getCharacteristic(Characteristic.TargetPosition)
                 .updateValue(attribute.target_value, null, 'ws');
+            if (this.platform.debug) this.log(this.name + ': TargetPosition:' + attribute.target_value);
             break;
         case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
             this.attributes.upDown = attribute;
             this.service.getCharacteristic(Characteristic.PositionState)
                 .updateValue([2,2,2,1,0][this.attributes.upDown.current_value], null, 'ws');
+            if (this.platform.debug) this.log(this.name + ': PositionState:' + attribute.current_value);
             break;
     }
-
-    if (this.platform.debug) this.log(this.name + ': ' + attributeType + ': ' + newValue);
 }
 
 WindowCoveringAccessory.prototype.setTargetPosition = function (value, callback, context) {
