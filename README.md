@@ -36,7 +36,7 @@ Example:
         ]
     }
 
-## Exclude nodes
+## Exclude nodes or homeegrams
 This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in homee and add all the devices you want to use with homebridge. Other devices are then ignored.
 
 ## Tested devices
@@ -47,6 +47,7 @@ This plugin integrates all (known) devices to homebridge by default. You can cre
 - Devolo Smart Metering Plug
 - Fibaro Door/Window Sensor
 - Fibaro Motion Sensor
+- Fibaro Roller Shutter
 - Fibaro Smoke Sensor 2
 - Fibaro Wall Plug
 - Greenwave Powernode

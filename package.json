@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homee",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "homee platform plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
