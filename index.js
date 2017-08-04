@@ -3,7 +3,7 @@
 let Accessory, Service, Characteristic, UUIDGen;
 const Homee = require("./lib/homee");
 const nodeTypes = require("./lib/node_types");
-let HomeeAccessory, WindowCoveringAccessory, MultiSwitchAccessory, HomeegramAccessory;
+let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -12,7 +12,6 @@ module.exports = function(homebridge) {
     Accessory = homebridge.platformAccessory;
 
     HomeeAccessory = require("./accessories/HomeeAccessory.js")(Service, Characteristic);
-    MultiSwitchAccessory = require("./accessories/MultiSwitchAccessory.js")(Service, Characteristic);
     WindowCoveringAccessory = require("./accessories/WindowCoveringAccessory.js")(Service, Characteristic);
     HomeegramAccessory = require("./accessories/HomeegramAccessory.js")(Service, Characteristic);
 
@@ -94,9 +93,8 @@ HomeePlatform.prototype.accessories = function(callback) {
         if (nodeType === 'WindowCovering') {
             if (that.debug) that.log(name + ': ' + nodeType);
             newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, that.nodes[i], that);
-        } else if (nodeType === 'MultiSwitch') {
-            if (that.debug) that.log(name + ': ' + nodeType);
-            newAccessory = new MultiSwitchAccessory(name, uuid, nodeType, that.nodes[i], that);
+        } else if (nodeType === 'DoubleSwitch') {
+            if (that.debug) that.log(name + ': DoubleSwitch currently not supported');
         } else if (nodeType) {
             if (that.debug) that.log(name + ': ' + nodeType);
             newAccessory = new HomeeAccessory(name, uuid, nodeType, that.nodes[i], that);
