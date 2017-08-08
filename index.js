@@ -137,7 +137,7 @@ HomeePlatform.prototype.filterDevices = function (all) {
         }
     }
 
-    if(!groupId) return {nodes: all.nodes, homeegrams: all.homeegrams};
+    if(!groupId) return [all.nodes, all.homeegrams];
 
     for (let relationship of all.relationships) {
         if (relationship.group_id === groupId) {
