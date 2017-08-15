@@ -12,7 +12,7 @@ HomeegramAccessory.prototype.runHomeegram = function (state, callback) {
         return;
     }
 
-    if (this.platform.debug) this.log('Running ' + this.name);
+    this.log.debug('Running ' + this.name);
     this.platform.homee.send('PUT:homeegrams/' + this.homeegram.id + '?play=1');
 
     callback(null, true);

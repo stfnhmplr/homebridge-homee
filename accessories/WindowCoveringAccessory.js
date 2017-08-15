@@ -31,16 +31,16 @@ WindowCoveringAccessory.prototype.updateValue = function (attribute) {
             this.attributes.position = attribute;
             this.service.getCharacteristic(Characteristic.CurrentPosition)
                 .updateValue(attribute.current_value, null, 'ws');
-            if (this.platform.debug) this.log(this.name + ': CurrentPosition:' + attribute.current_value);
+            this.log.debug(this.name + ': CurrentPosition:' + attribute.current_value);
             this.service.getCharacteristic(Characteristic.TargetPosition)
                 .updateValue(attribute.target_value, null, 'ws');
-            if (this.platform.debug) this.log(this.name + ': TargetPosition:' + attribute.target_value);
+            this.log.debug(this.name + ': TargetPosition:' + attribute.target_value);
             break;
         case ENUMS.CAAttributeType.CAAttributeTypeUpDown:
             this.attributes.upDown = attribute;
             this.service.getCharacteristic(Characteristic.PositionState)
                 .updateValue(this.positions[this.attributes.upDown.current_value], null, 'ws');
-            if (this.platform.debug) this.log(this.name + ': PositionState:' + attribute.current_value);
+            this.log.debug(this.name + ': PositionState:' + attribute.current_value);
             break;
     }
 }
@@ -51,7 +51,7 @@ WindowCoveringAccessory.prototype.setTargetPosition = function (value, callback,
         return;
     }
 
-    if (this.platform.debug) this.log('Setting ' + this.name + ' to ' + value);
+    this.log.debug('Setting ' + this.name + ' to ' + value);
     this.platform.homee.send(
         'PUT:/nodes/' + this.nodeId + '/attributes/' + this.attributes.position.id + '?target_value=' + value
     );
@@ -67,7 +67,7 @@ WindowCoveringAccessory.prototype.setPositionState = function (value, callback, 
 
     newValue = [1,0,2][value];
 
-    if (this.platform.debug) this.log('Setting ' + this.name + ' to ' + newValue);
+    this.log.debug('Setting ' + this.name + ' to ' + newValue);
     this.platform.homee.send(
         'PUT:/nodes/' + this.nodeId + '/attributes/' + this.attributes.upDown.id + '?target_value=' + newValue
     );
