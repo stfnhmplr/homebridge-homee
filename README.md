@@ -30,8 +30,7 @@ Example:
                 "name": "homee",
                 "host": "192.168.178.1",
                 "user": "your-username",
-                "pass": "your-password",
-                "debug": true //optional, enable debug mode
+                "pass": "your-password"
             }
         ]
     }
@@ -45,7 +44,9 @@ This plugin integrates all (known) devices to homebridge by default. You can cre
 - Devolo Motion Sensor
 - Devolo Heizkörperthermostate
 - Devolo Smart Metering Plug
+- Everspring AN180 Wall Plug
 - Fibaro Door/Window Sensor
+- Fibaro Flood Sensor
 - Fibaro Motion Sensor
 - Fibaro Roller Shutter
 - Fibaro Smoke Sensor 2
@@ -54,3 +55,4 @@ This plugin integrates all (known) devices to homebridge by default. You can cre
 - Philips Hue White and Color Ambiance
 - Philips Hue White
 - Popp Rauchwarnmelder mit Sirene
+- Sensative Stripes
