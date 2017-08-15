@@ -32,13 +32,14 @@ function HomeePlatform(log, config, api) {
     that.homee
         .connect()
         .then(() => {
-            if (that.debug) that.log("connected to homee");
+            that.log("connected to homee");
 
             that.homee.send('GET:all');
 
             that.homee.listen(message => {
                 if (message.all && !that.foundAccessories.length) {
                     [that.nodes, that.homeegrams] = that.filterDevices(message.all);
+                    that.nodes = require('./example.json');
                 } else if (message.attribute || message.node) {
                     let attributes = message.node ? message.node.attributes : [message.attribute];
 
@@ -54,7 +55,7 @@ function HomeePlatform(log, config, api) {
             });
         })
         .catch(err => {
-            that.log(err);
+            that.log.error(err);
         });
 
     if (api) {
@@ -66,7 +67,7 @@ HomeePlatform.prototype.accessories = function(callback) {
     let that = this;
 
     if (that.attempts > 5) {
-        if (that.debug) that.log("Can't connect to homee!")
+        that.log.warn("Can't connect to homee!")
         callback([]);
         return;
     }
@@ -74,7 +75,7 @@ HomeePlatform.prototype.accessories = function(callback) {
     that.attempts++;
 
     if (!that.homee.connected || !that.nodes.length) {
-        if (that.debug && !that.homee.connected) that.log("Not connected to homee. Retrying...");
+        if (!that.homee.connected) that.log("Not connected to homee. Retrying...");
         setTimeout(() => {
             that.accessories(callback);
         }, 2000);
@@ -86,20 +87,22 @@ HomeePlatform.prototype.accessories = function(callback) {
 
         let name = decodeURI(that.nodes[i].name);
         let uuid = UUIDGen.generate('homee-' + that.nodes[i].id);
-        that.log('homee-' + that.nodes[i].id, uuid);
-        let newAccessory = '';
+        let newAccessory;
         let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(that.nodes[i].profile);
 
         if (nodeType === 'WindowCovering') {
-            if (that.debug) that.log(name + ': ' + nodeType);
+            that.log.debug(name + ': ' + nodeType);
             newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, that.nodes[i], that);
         } else if (nodeType === 'DoubleSwitch') {
-            if (that.debug) that.log(name + ': DoubleSwitch currently not supported');
+            that.log.debug(name + ': ' + nodeType);
+            that.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', that.nodes[i], that, 1))
+            let uuid2 = UUIDGen.generate('homee-' + that.nodes[i].id + '2');
+            newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', that.nodes[i], that, 2);
         } else if (nodeType) {
-            if (that.debug) that.log(name + ': ' + nodeType);
+            that.log.debug(name + ': ' + nodeType);
             newAccessory = new HomeeAccessory(name, uuid, nodeType, that.nodes[i], that);
         } else {
-            if (that.debug) that.log(name + ': unknown Accessory Type');
+            that.log.debug(name + ': unknown Accessory Type');
         }
 
         if (newAccessory) {
@@ -112,7 +115,7 @@ HomeePlatform.prototype.accessories = function(callback) {
         let uuid = UUIDGen.generate('homee-hg-' + that.homeegrams[i].id);
         let newAccessory = '';
 
-        if (that.debug) that.log(name + ': Homeegram');
+        that.log.debug(name + ': Homeegram');
         newAccessory = new HomeegramAccessory(name, uuid, that.homeegrams[i], that);
         that.foundAccessories.push(newAccessory);
     }
