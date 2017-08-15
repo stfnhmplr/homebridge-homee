@@ -39,7 +39,6 @@ function HomeePlatform(log, config, api) {
             that.homee.listen(message => {
                 if (message.all && !that.foundAccessories.length) {
                     [that.nodes, that.homeegrams] = that.filterDevices(message.all);
-                    that.nodes = require('./example.json');
                 } else if (message.attribute || message.node) {
                     let attributes = message.node ? message.node.attributes : [message.attribute];
 
