@@ -55,4 +55,5 @@ This plugin integrates all (known) devices to homebridge by default. You can cre
 - Philips Hue White and Color Ambiance
 - Philips Hue White
 - Popp Rauchwarnmelder mit Sirene
+- Qubino Flush Dimmer
 - Sensative Stripes
