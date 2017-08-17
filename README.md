@@ -46,9 +46,10 @@ This plugin integrates all (known) devices to homebridge by default. You can cre
 - Devolo Smart Metering Plug
 - Everspring AN180 Wall Plug
 - Fibaro Door/Window Sensor
+- Fibaro Double Switch
 - Fibaro Flood Sensor
 - Fibaro Motion Sensor
-- Fibaro Roller Shutter
+- Fibaro Roller Shutter 2 (FGR-222)
 - Fibaro Smoke Sensor 2
 - Fibaro Wall Plug
 - Greenwave Powernode
