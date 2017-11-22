@@ -76,13 +76,16 @@ WindowCoveringAccessory.prototype.getServices = function () {
 
    this.service.getCharacteristic(Characteristic.CurrentPosition)
        .updateValue(100-this.attributes.position.current_value);
+   this.log.debug('CurrentPosition: ' + (100-this.attributes.position.current_value));
 
    this.service.getCharacteristic(Characteristic.TargetPosition)
        .updateValue(100-this.attributes.position.target_value)
        .on('set', this.setTargetPosition.bind(this));
+   this.log.debug('TargetPosition: ' + (100-this.attributes.position.target_value));
 
    this.service.getCharacteristic(Characteristic.PositionState)
        .updateValue(this.positions[this.attributes.upDown.current_value])
+   this.log.debug('PositionState: ' + this.positions[this.attributes.upDown.current_value]);
 
    return [informationService, this.service];
 };
