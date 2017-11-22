@@ -10,7 +10,7 @@ function HomeeAccessory(name, uuid, profile, node, platform, instance) {
     this.instance = instance || 0;
     this.attributes = node.attributes;
     this.editableAttributes = [];
-    this.map = {};
+    this.map = [];
 }
 
 HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, attributeId) {
@@ -59,14 +59,18 @@ HomeeAccessory.prototype.getServices = function () {
 
     this.service = new Service[this.profile](this.name);
 
-    //addCharacteristics
+    // addCharacteristics
     for (let i=0; i<this.attributes.length; i++) {
         let that = this;
 
         let attributeType = attributeTypes.getHAPTypeByAttributeType(this.attributes[i].type);
         let attributeId = this.attributes[i].id;
 
-        if (attributeType === 'On' && this.attributes[i].instance !== this.instance) continue;
+        // skip characteristic if instance doesn't match
+        if (attributeType === 'On' && this.instance !== 0 && this.attributes[i].instance !== this.instance) continue;
+
+        // ensure that characteristic 'On' is unique --> Fibaro FGS 213
+        if (attributeType === 'On' && this.map.indexOf(Characteristic.On) > -1) continue;
 
         if (attributeType) {
             this.log.debug(attributeType + ': ' + this.attributes[i].current_value);

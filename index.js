@@ -37,20 +37,7 @@ function HomeePlatform(log, config, api) {
             that.homee.send('GET:all');
 
             that.homee.listen(message => {
-                if (message.all && !that.foundAccessories.length) {
-                    [that.nodes, that.homeegrams] = that.filterDevices(message.all);
-                } else if (message.attribute || message.node) {
-                    let attributes = message.node ? message.node.attributes : [message.attribute];
-
-                    attributes.forEach((attribute) => {
-                        for (let i=0; i<that.foundAccessories.length; i++) {
-                            const accessory = that.foundAccessories[i];
-                            if (accessory.nodeId === attribute.node_id) {
-                                accessory.updateValue(attribute);
-                            }
-                        }
-                    })
-                }
+                that.handleMessage(message);
             });
         })
         .catch(err => {
@@ -161,4 +148,27 @@ HomeePlatform.prototype.filterDevices = function (all) {
     }
 
     return [filtered.nodes, filtered.homeegrams];
+}
+
+/**
+ * handle incoming messages
+ * @param  Object  message  incoming homee message
+ */
+HomeePlatform.prototype.handleMessage = function (message) {
+    var that = this;
+
+    if (message.all && !that.foundAccessories.length) {
+        [that.nodes, that.homeegrams] = that.filterDevices(message.all);
+    } else if (message.attribute || message.node) {
+        let attributes = message.node ? message.node.attributes : [message.attribute];
+
+        attributes.forEach((attribute) => {
+            for (let i=0; i<that.foundAccessories.length; i++) {
+                const accessory = that.foundAccessories[i];
+                if (accessory.nodeId === attribute.node_id) {
+                    accessory.updateValue(attribute);
+                }
+            }
+        })
+    }
 }
