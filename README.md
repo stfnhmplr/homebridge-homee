@@ -8,6 +8,8 @@ homee platform plugin for homebridge: https://github.com/nfarina/homebridge
 Follow the instruction in [NPM](https://www.npmjs.com/package/homebridge) for the homebridge server installation. The plugin is published through [NPM](https://www.npmjs.com/package/homebridge-homee) and should be installed "globally" by typing:
 
     sudo npm install -g homebridge-homee
+    
+Alternatively you could use [**homeean**](https://himpler.com/homeean) to install homebridge-homee (including Homebridge) on a Raspberry Pi with a plain vanilla Raspbian installation. homeean is a web based buildtool, which generates an individual buildscript (Bash-Script) for user selected Smart Home Tools to be installed on a Raspberry Pi running on Raspbian. homebridge-homee (including its dependecy Homebridge) is provided as an homeean install option.
 
 ## Configuration
 
