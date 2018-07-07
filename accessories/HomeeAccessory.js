@@ -1,101 +1,98 @@
-const attributeTypes = require("../lib/attribute_types");
+const attributeTypes = require('../lib/attribute_types')
 
-function HomeeAccessory(name, uuid, profile, node, platform, instance) {
-    this.name = name;
-    this.uuid = uuid;
-    this.platform = platform
-    this.log = platform.log;
-    this.nodeId = node.id;
-    this.profile = profile;
-    this.instance = instance || 0;
-    this.attributes = node.attributes;
-    this.editableAttributes = [];
-    this.map = [];
-}
+let Service, Characteristic;
 
-HomeeAccessory.prototype.setValue = function (value, callback, context, uuid, attributeId) {
-    if (context && context == 'ws') {
-		callback(null, value);
-	    return;
-	}
+class HomeeAccessory {
 
-    if (value === true) value = 1;
-    if (value === false) value = 0;
+    constructor(name, uuid, profile, node, platform, instance) {
+        this.name = name;
+        this.uuid = uuid;
+        this.platform = platform
+        this.log = platform.log;
+        this.homee = platform.homee;
+        this.nodeId = node.id;
+        this.profile = profile;
+        this.instance = instance || 0;
+        this.attributes = node.attributes;
+        this.map = [];
+    }
 
-    this.log.debug('Setting ' + this.name + ' to ' + value);
-    this.platform.homee.send(
-        'PUT:/nodes/' + this.nodeId + '/attributes/' + attributeId + '?target_value=' + value
-    );
+    setValue(value, callback, context, uuid, attributeId) {
+        if (context && context == 'ws') {
+            callback(null, value);
+            return;
+        }
 
-    callback(null, value);
-}
+        if (value === true) value = 1;
+        if (value === false) value = 0;
 
-HomeeAccessory.prototype.updateValue = function (attribute) {
-    var that = this;
+        this.log.debug('Setting ' + this.name + ' to ' + value);
+        this.homee.setValue(this.nodeId, attributeId, value);
 
-    if (that.service && attribute.id in that.map) {
+        callback(null, value);
+    }
 
-        let attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
-        let newValue = attribute.current_value;
-        let oldValue = that.service.getCharacteristic(that.map[attribute.id]).value;
-        let targetValue = attribute.target_value;
+    updateValue(attribute) {
+        if (this.service && attribute.id in this.map) {
 
-        if(newValue!==oldValue && newValue===targetValue) {
-            that.service.getCharacteristic(that.map[attribute.id])
-            .updateValue(newValue, null, 'ws');
+            let attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
+            let newValue = attribute.current_value;
+            let oldValue = this.service.getCharacteristic(this.map[attribute.id]).value;
+            let targetValue = attribute.target_value;
 
-            that.log.debug(that.name + ': ' + attributeType + ': ' + newValue);
+            if(newValue!==oldValue && newValue===targetValue) {
+                this.service.getCharacteristic(this.map[attribute.id]).updateValue(newValue, null, 'ws');
+                this.log.debug(this.name + ': ' + attributeType + ': ' + newValue);
+            }
         }
     }
-}
 
-HomeeAccessory.prototype.getServices = function () {
-    let informationService = new Service.AccessoryInformation();
+    getServices() {
+        let informationService = new Service.AccessoryInformation();
 
-    informationService
-        .setCharacteristic(Characteristic.Manufacturer, "Homee")
-        .setCharacteristic(Characteristic.Model, "")
-        .setCharacteristic(Characteristic.SerialNumber, "");
+        informationService
+            .setCharacteristic(Characteristic.Manufacturer, "Homee")
+            .setCharacteristic(Characteristic.Model, "")
+            .setCharacteristic(Characteristic.SerialNumber, "");
 
-    this.service = new Service[this.profile](this.name);
+        this.service = new Service[this.profile](this.name);
 
-    // addCharacteristics
-    for (let i=0; i<this.attributes.length; i++) {
-        let that = this;
+        // addCharacteristics
+        for (let attribute of this.attributes) {
+            let attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
+            let attributeId = attribute.id;
 
-        let attributeType = attributeTypes.getHAPTypeByAttributeType(this.attributes[i].type);
-        let attributeId = this.attributes[i].id;
+            // skip characteristic if instance doesn't match
+            if (attributeType === 'On' && this.instance !== 0 && attribute.instance !== this.instance) continue;
 
-        // skip characteristic if instance doesn't match
-        if (attributeType === 'On' && this.instance !== 0 && this.attributes[i].instance !== this.instance) continue;
+            // ensure that characteristic 'On' is unique --> Fibaro FGS 213
+            if (attributeType === 'On' && this.map.indexOf(Characteristic.On) > -1) continue;
 
-        // ensure that characteristic 'On' is unique --> Fibaro FGS 213
-        if (attributeType === 'On' && this.map.indexOf(Characteristic.On) > -1) continue;
+            if (attributeType) {
+                this.log.debug(attributeType + ': ' + attribute.current_value);
+                this.map[attribute.id] = Characteristic[attributeType];
 
-        if (attributeType) {
-            this.log.debug(attributeType + ': ' + this.attributes[i].current_value);
-            this.map[this.attributes[i].id] = Characteristic[attributeType];
+                if (!this.service.getCharacteristic(Characteristic[attributeType])) {
+                    this.service.addCharacteristic(Characteristic[attributeType])
+                }
 
-            if (!this.service.getCharacteristic(Characteristic[attributeType])) {
-                this.service.addCharacteristic(Characteristic[attributeType])
-            }
-
-            this.service.getCharacteristic(Characteristic[attributeType])
-            .updateValue(this.attributes[i].current_value);
-
-            if (this.attributes[i].editable) {
                 this.service.getCharacteristic(Characteristic[attributeType])
-                .on('set', function() {
-                    var args = Array.prototype.slice.call(arguments);
-                    args.push(attributeId);
-                    this.setValue.apply(this, args);
-                }.bind(this));
+                    .updateValue(attribute.current_value);
+
+                if (attribute.editable) {
+                    this.service.getCharacteristic(Characteristic[attributeType])
+                        .on('set', function() {
+                            var args = Array.prototype.slice.call(arguments);
+                            args.push(attributeId);
+                            this.setValue.apply(this, args);
+                        }.bind(this));
+                }
             }
         }
-    }
 
-    return [informationService, this.service];
-};
+        return [informationService, this.service];
+    }
+}
 
 module.exports = function(oService, oCharacteristic) {
     Service = oService;

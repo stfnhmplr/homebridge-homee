@@ -1,7 +1,7 @@
 'use strict';
 
 let Accessory, Service, Characteristic, UUIDGen;
-const Homee = require("./lib/homee");
+const Homee = require("homee-api");
 const nodeTypes = require("./lib/node_types");
 let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory;
 
@@ -18,157 +18,158 @@ module.exports = function(homebridge) {
     homebridge.registerPlatform("homebridge-homee", "homee", HomeePlatform, false);
 };
 
-function HomeePlatform(log, config, api) {
-    this.log = log;
-    this.homee = new Homee(config.host, config.user, config.pass);
-    this.debug = config.debug || false;
-    this.nodes = [];
-    this.homeegrams = [];
-    this.foundAccessories = [];
-    this.attempts = 0;
+class HomeePlatform {
 
-    const that = this;
+    /**
+     * create a new instance
+     * @param log
+     * @param config
+     * @param api
+     */
+    constructor(log, config, api) {
+        this.log = log;
+        this.homee = new Homee(config.host, config.user, config.pass);
+        this.nodes = [];
+        this.homeegrams = [];
+        this.foundAccessories = [];
+        this.attempts = 0;
+        this.connected = false;
 
-    that.homee
-        .connect()
-        .then(() => {
-            that.log("connected to homee");
+        if (api) this.api = api;
 
-            that.homee.send('GET:all');
-
-            that.homee.listen(message => {
-                that.handleMessage(message);
-            });
-        })
-        .catch(err => {
-            that.log.error(err);
+        this.homee.on('message', message => this.handleMessage(message));
+        this.homee.on('error', err => this.log.error(err));
+        this.homee.on('disconnect', () => {
+            this.log('disconnected from homee');
+            this.connected = false;
         });
 
-    if (api) {
-        this.api = api;
-    }
-}
-
-HomeePlatform.prototype.accessories = function(callback) {
-    let that = this;
-
-    if (that.attempts > 5) {
-        that.log.warn("Can't connect to homee!")
-        callback([]);
-        return;
+        this.homee.connect()
+            .then(() => {
+                this.log("connected to homee");
+                this.connected = true;
+                this.homee.send('GET:all');
+            })
+            .catch(err => this.log.error(err));
     }
 
-    that.attempts++;
-
-    if (!that.homee.connected || !that.nodes.length) {
-        if (!that.homee.connected) that.log("Not connected to homee. Retrying...");
-        setTimeout(() => {
-            that.accessories(callback);
-        }, 2000);
-        return;
-    }
-
-    for (let i = 0; i < that.nodes.length; i++) {
-        if (that.nodes[i].id < 1) continue;
-
-        let name = decodeURI(that.nodes[i].name);
-        let uuid = UUIDGen.generate('homee-' + that.nodes[i].id);
-        let newAccessory;
-        let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(that.nodes[i].profile);
-
-        if (nodeType === 'WindowCovering') {
-            that.log.debug(name + ': ' + nodeType);
-            newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, that.nodes[i], that);
-        } else if (nodeType === 'DoubleSwitch') {
-            that.log.debug(name + ': ' + nodeType);
-            that.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', that.nodes[i], that, 1))
-            let uuid2 = UUIDGen.generate('homee-' + that.nodes[i].id + '2');
-            newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', that.nodes[i], that, 2);
-        } else if (nodeType) {
-            that.log.debug(name + ': ' + nodeType);
-            newAccessory = new HomeeAccessory(name, uuid, nodeType, that.nodes[i], that);
-        } else {
-            that.log.debug(name + ': unknown Accessory Type');
+    /**
+     * create accessories
+     * @param callback
+     */
+    accessories (callback) {
+        if (this.attempts > 5) {
+            this.log.warn("Can't connect to homee! Please check that your homee is online and your config is right")
+            callback([]);
+            return;
         }
 
-        if (newAccessory) {
-            that.foundAccessories.push(newAccessory);
+        this.attempts++;
+
+        if (!this.connected || !this.nodes.length) {
+            this.log("Not connected to homee. Retrying...");
+            setTimeout(() => this.accessories(callback), 2000);
+            return;
         }
-    }
 
-    for (let i = 0; i < that.homeegrams.length; i++) {
-        let name = decodeURI(that.homeegrams[i].name);
-        let uuid = UUIDGen.generate('homee-hg-' + that.homeegrams[i].id);
-        let newAccessory = '';
+        for (let node of this.nodes) {
+            if (node.id < 1) continue;
 
-        that.log.debug(name + ': Homeegram');
-        newAccessory = new HomeegramAccessory(name, uuid, that.homeegrams[i], that);
-        that.foundAccessories.push(newAccessory);
-    }
+            let name = decodeURI(node.name);
+            let uuid = UUIDGen.generate('homee-' + node.id);
+            let newAccessory;
+            let nodeType = nodeTypes.getAccessoryTypeByNodeProfile(node.profile);
 
-    callback(that.foundAccessories);
-};
+            if (nodeType === 'WindowCovering') {
+                this.log.debug(name + ': ' + nodeType);
+                newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
+            } else if (nodeType === 'DoubleSwitch') {
+                this.log.debug(name + ': ' + nodeType);
+                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node[i], this, 1))
+                let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
+                newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
+            } else if (nodeType) {
+                this.log.debug(name + ': ' + nodeType);
+                newAccessory = new HomeeAccessory(name, uuid, nodeType, node, this);
+            } else {
+                this.log.debug(name + ': unknown Accessory Type');
+            }
 
-/**
- * filter nodes if group 'homebridge' exists
- * @param  Object all   groups, relationships, nodes, homeegrams
- * @return Array   filtered or all nodes and homeegrams
- */
-HomeePlatform.prototype.filterDevices = function (all) {
-    let groupId;
-    let nodeIds = [];
-    let homeegramIds = [];
-    let filtered = {nodes: [], homeegrams: []};
+            if (newAccessory) this.foundAccessories.push(newAccessory);
 
-    for (let group of all.groups) {
-        if (group.name.match(/^homebridge$/i)) {
-            groupId = group.id;
         }
-    }
 
-    if(!groupId) return [all.nodes, all.homeegrams];
+        for (let homeegram of this.homeegrams) {
+            let name = decodeURI(homeegram.name);
+            let uuid = UUIDGen.generate('homee-hg-' + homeegram.id);
+            let newAccessory = '';
 
-    for (let relationship of all.relationships) {
-        if (relationship.group_id === groupId) {
-            nodeIds.push(relationship.node_id);
-            homeegramIds.push(relationship.homeegram_id);
+            this.log.debug(name + ': Homeegram');
+            newAccessory = new HomeegramAccessory(name, uuid, homeegram, this);
+            this.foundAccessories.push(newAccessory);
         }
+
+        callback(this.foundAccessories);
     }
 
-    for (let node of all.nodes) {
-        if (nodeIds.indexOf(node.id) !== -1) {
-            filtered.nodes.push(node);
+    /**
+     * filter nodes if group 'homebridge' exists
+     * @param all
+     * @returns {*[]}
+     */
+    filterDevices (all) {
+        let groupId;
+        let nodeIds = [];
+        let homeegramIds = [];
+        let filtered = {nodes: [], homeegrams: []};
+
+        for (let group of all.groups) {
+            if (group.name.match(/^homebridge$/i)) {
+                groupId = group.id;
+            }
         }
-    }
 
-    for (let homeegram of all.homeegrams) {
-        if (homeegramIds.indexOf(homeegram.id) !== -1) {
-            filtered.homeegrams.push(homeegram);
+        if (!groupId) return [all.nodes, all.homeegrams];
+
+        for (let relationship of all.relationships) {
+            if (relationship.group_id === groupId) {
+                nodeIds.push(relationship.node_id);
+                homeegramIds.push(relationship.homeegram_id);
+            }
         }
+
+        for (let node of all.nodes) {
+            if (nodeIds.indexOf(node.id) !== -1) {
+                filtered.nodes.push(node);
+            }
+        }
+
+        for (let homeegram of all.homeegrams) {
+            if (homeegramIds.indexOf(homeegram.id) !== -1) {
+                filtered.homeegrams.push(homeegram);
+            }
+        }
+
+        return [filtered.nodes, filtered.homeegrams];
     }
 
-    return [filtered.nodes, filtered.homeegrams];
-}
+    /**
+     * handle incoming messages
+     * @param message
+     */
+    handleMessage(message) {
+        if (message.all && !this.foundAccessories.length) {
+            [this.nodes, this.homeegrams] = this.filterDevices(message.all);
+        } else if (message.attribute || message.node) {
+            let attributes = message.node ? message.node.attributes : [message.attribute];
 
-/**
- * handle incoming messages
- * @param  Object  message  incoming homee message
- */
-HomeePlatform.prototype.handleMessage = function (message) {
-    var that = this;
-
-    if (message.all && !that.foundAccessories.length) {
-        [that.nodes, that.homeegrams] = that.filterDevices(message.all);
-    } else if (message.attribute || message.node) {
-        let attributes = message.node ? message.node.attributes : [message.attribute];
-
-        attributes.forEach((attribute) => {
-            for (let i=0; i<that.foundAccessories.length; i++) {
-                const accessory = that.foundAccessories[i];
-                if (accessory.nodeId === attribute.node_id) {
+            for (let attribute of attributes) {
+                let accessory = this.foundAccessories.find(a => a.nodeId === attribute.node_id);
+                if (accessory) {
                     accessory.updateValue(attribute);
+                    this.log.info('Updated accessory %s', accessory.name)
                 }
             }
-        })
+        }
     }
 }

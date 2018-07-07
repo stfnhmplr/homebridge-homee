@@ -1,47 +1,54 @@
-function HomeegramAccessory(name, uuid, homeegram, platform) {
-    this.name = name;
-    this.uuid = uuid;
-    this.platform = platform
-    this.log = platform.log;
-    this.homeegram = homeegram;
-}
+'use strict'
 
-HomeegramAccessory.prototype.runHomeegram = function (state, callback) {
-    if (!state) {
-        callback(null, false);
-        return;
+let Service, Characteristic;
+
+class HomeegramAccessory {
+    constructor(name, uuid, homeegram, platform) {
+        this.name = name;
+        this.uuid = uuid;
+        this.platform = platform;
+        this.homee = platform.homee;
+        this.log = platform.log;
+        this.homeegram = homeegram;
     }
 
-    this.log.debug('Running ' + this.name);
-    this.platform.homee.send('PUT:homeegrams/' + this.homeegram.id + '?play=1');
+    playHomeegram(state, callback) {
+        if (!state) {
+            callback(null, false);
+            return;
+        }
 
-    callback(null, true);
+        this.log.debug('Playing ' + this.name);
+        this.homee.play(this.homeegram.id);
 
-    setTimeout(() => { //simulate button behaviour
+        callback(null, true);
+
+        setTimeout(() => { //simulate button behaviour
             this.service.getCharacteristic(Characteristic.On).updateValue(false);
-    }, 1000);
+        }, 1000);
+    }
+
+    getState(callback) {
+        callback(null, false)
+    }
+
+    getServices() {
+        let informationService = new Service.AccessoryInformation();
+
+        informationService
+            .setCharacteristic(Characteristic.Manufacturer, "Homee")
+            .setCharacteristic(Characteristic.Model, "Homeegram")
+            .setCharacteristic(Characteristic.SerialNumber, "");
+
+        this.service = new Service.Switch;
+
+        this.service.getCharacteristic(Characteristic.On)
+            .on('get', this.getState.bind(this))
+            .on('set', this.playHomeegram.bind(this));
+
+        return [informationService, this.service];
+    };
 }
-
-HomeegramAccessory.prototype.getState = function (callback) {
-    callback(null, false);
-}
-
-HomeegramAccessory.prototype.getServices = function () {
-    let informationService = new Service.AccessoryInformation();
-
-    informationService
-        .setCharacteristic(Characteristic.Manufacturer, "Homee")
-        .setCharacteristic(Characteristic.Model, "Homeegram")
-        .setCharacteristic(Characteristic.SerialNumber, "");
-
-    this.service = new Service.Switch;
-
-    this.service.getCharacteristic(Characteristic.On)
-    .on('get', this.getState.bind(this))
-    .on('set', this.runHomeegram.bind(this));
-
-    return [informationService, this.service];
-};
 
 module.exports = function(oService, oCharacteristic) {
     Service = oService;

@@ -1,7 +1,5 @@
 # Homebridge-homee
 
-[![Package Quality](http://npm.packagequality.com/shield/homebridge-homee.svg)](http://packagequality.com/#?package=homebridge-homee)
-
 homee platform plugin for homebridge: https://github.com/nfarina/homebridge
 
 ## Installation
@@ -36,7 +34,7 @@ Example:
     }
 
 ## Exclude nodes or homeegrams
-This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in homee and add all the devices you want to use with homebridge. Other devices are then ignored.
+This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in homee and add all the devices you want to use with homebridge. Other devices are ignored.
 
 ## Tested devices
 - Danfoss Living connect Thermostat
@@ -58,3 +56,6 @@ This plugin integrates all (known) devices to homebridge by default. You can cre
 - Popp Rauchwarnmelder mit Sirene
 - Qubino Flush Dimmer
 - Sensative Stripes
+
+## Donate
+<a href="https://www.buymeacoffee.com/himpler" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>

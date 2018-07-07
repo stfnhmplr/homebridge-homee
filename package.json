@@ -1,10 +1,11 @@
 {
   "name": "homebridge-homee",
-  "version": "0.2.4",
+  "version": "1.0.0",
   "description": "homee platform plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
-    "homebridge-plugin", "homee"
+    "homebridge-plugin",
+    "homee"
   ],
   "repository": {
     "type": "git",
@@ -18,8 +19,6 @@
     "homebridge": ">=0.2.0"
   },
   "dependencies": {
-    "crypto-toolkit": "^1.0.0",
-    "request": "^2.79.0",
-    "ws": "^1.1.1"
+    "homee-api": "^0.9.7"
   }
 }
