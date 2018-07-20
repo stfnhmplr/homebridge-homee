@@ -35,6 +35,11 @@ class HomeePlatform {
         this.attempts = 0;
         this.connected = false;
 
+        if (config.selectGroup === undefined) {
+            this.selectGroup = new RegExp('^homebridge$', 'i');
+        } else {
+            this.selectGroup = new RegExp('^' + config.selectGroup + '$', 'i');
+        }
         if (api) this.api = api;
 
         this.homee.on('message', message => this.handleMessage(message));
@@ -124,7 +129,7 @@ class HomeePlatform {
         let filtered = {nodes: [], homeegrams: []};
 
         for (let group of all.groups) {
-            if (group.name.match(/^homebridge$/i)) {
+            if (group.name.match(this.selectGroup)) {
                 groupId = group.id;
             }
         }
