@@ -34,6 +34,7 @@ class HomeePlatform {
         this.foundAccessories = [];
         this.attempts = 0;
         this.connected = false;
+        this.groupName = config.groupName || 'homebridge';
 
         if (api) this.api = api;
 
@@ -130,7 +131,7 @@ class HomeePlatform {
         let filtered = {nodes: [], homeegrams: []};
 
         for (let group of all.groups) {
-            if (group.name.match(/^homebridge$/i)) {
+            if (group.name.match(new RegExp('^' + this.groupName + '$', 'i'))) {
                 groupId = group.id;
             }
         }
