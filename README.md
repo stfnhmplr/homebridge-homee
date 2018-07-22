@@ -38,6 +38,9 @@ Example:
 ## Exclude nodes or homeegrams
 This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in homee and add all the devices you want to use with homebridge. Other devices are ignored.
 
+### Device Limit
+Homekit cannot manage more than 100 devices per bridge. If you have together more than 100 devices and homeegrams, you have to filter some of them with a group.
+
 ## Tested devices
 - Danfoss Living connect Thermostat
 - Devolo Door/Window Sensor
