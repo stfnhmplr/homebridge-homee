@@ -30,13 +30,14 @@ Example:
                 "name": "homee",
                 "host": "192.168.178.1",
                 "user": "your-username",
-                "pass": "your-password"
+                "pass": "your-password",
+                "selectGroup": "group-name"
             }
         ]
     }
 
 ## Exclude nodes or homeegrams
-This plugin integrates all (known) devices to homebridge by default. You can create a group named 'Homebridge' in homee and add all the devices you want to use with homebridge. Other devices are ignored.
+This plugin integrates all (known) devices to homebridge by default. You can limit the integration to certain devices by creating a group in homee and adding all the devices you want to use with homebridge. If not explicitly specified, the name of this group defaults to 'Homebridge'. It may be changed using the optional 'selectGroup' statement. Devices outside this group are ignored.
 
 ### Device Limit
 Homekit cannot manage more than 100 devices per bridge. If you have together more than 100 devices and homeegrams, you have to filter some of them with a group.
