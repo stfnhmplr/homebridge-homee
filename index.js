@@ -59,15 +59,21 @@ class HomeePlatform {
      */
     accessories (callback) {
         if (this.attempts > 5) {
-            this.log.warn("Can't connect to homee! Please check that your homee is online and your config is right")
+            this.log.warn("Can't get devices or homeegrams. Please check that homee is online and your config is right")
             callback([]);
             return;
         }
 
         this.attempts++;
 
-        if (!this.connected || !this.nodes.length) {
+        if (!this.connected) {
             this.log("Not connected to homee. Retrying...");
+            setTimeout(() => this.accessories(callback), 2000);
+            return;
+        }
+
+        if (!this.nodes.length && !this.homeegrams.length) {
+            this.log("Didn't receive any devices or homeegrams. Retrying...");
             setTimeout(() => this.accessories(callback), 2000);
             return;
         }
@@ -85,7 +91,7 @@ class HomeePlatform {
                 newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
             } else if (nodeType === 'DoubleSwitch') {
                 this.log.debug(name + ': ' + nodeType);
-                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node[i], this, 1))
+                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1))
                 let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
                 newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
             } else if (nodeType) {
