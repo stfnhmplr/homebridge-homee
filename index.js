@@ -35,6 +35,7 @@ class HomeePlatform {
         this.attempts = 0;
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
+        this.safeGuard = config.safeGuard || false;
 
         if (api) this.api = api;
 
@@ -60,7 +61,11 @@ class HomeePlatform {
      */
     accessories (callback) {
         if (this.attempts > 5) {
-            this.log.warn("Can't get devices or homeegrams. Please check that homee is online and your config is right")
+            this.log.warn("Can't get devices or homeegrams. Please check that homee is online and your config is right");
+            if (this.safeGuard) {
+                this.log.warn("Safeguard active - aborting Homebridge startup");
+                throw new Error("Safeguard active - aborting Homebridge startup");
+            }
             callback([]);
             return;
         }
@@ -136,7 +141,14 @@ class HomeePlatform {
             }
         }
 
-        if (!groupId) return [all.nodes, all.homeegrams];
+        if (!groupId) {
+            if (this.groupName !== "homebridge" && this.safeGuard) {
+                this.log.warn("Specified group not found. Safeguard active - aborting Homebridge startup");
+                throw new Error("Safeguard active - aborting Homebridge startup");
+            } else {
+                return [all.nodes, all.homeegrams];
+            }
+        }
 
         for (let relationship of all.relationships) {
             if (relationship.group_id === groupId) {
