@@ -61,7 +61,6 @@ In certain cases, this plugin may not be able to establish a connection to your 
 - Fibaro Smoke Sensor 2
 - Fibaro Wall Plug
 - Greenwave Powernode
-- Permundo PSC234ZW
 - Philips Hue White and Color Ambiance
 - Philips Hue White
 - Popp Rauchwarnmelder mit Sirene
