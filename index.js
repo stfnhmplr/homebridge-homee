@@ -3,7 +3,7 @@
 let Accessory, Service, Characteristic, UUIDGen;
 const Homee = require("homee-api");
 const nodeTypes = require("./lib/node_types");
-let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory;
+let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory, RgbLightbulbAccessory;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -14,6 +14,7 @@ module.exports = function(homebridge) {
     HomeeAccessory = require("./accessories/HomeeAccessory.js")(Service, Characteristic);
     WindowCoveringAccessory = require("./accessories/WindowCoveringAccessory.js")(Service, Characteristic);
     HomeegramAccessory = require("./accessories/HomeegramAccessory.js")(Service, Characteristic);
+    RgbLightbulbAccessory = require("./accessories/RgbLightbulbAccessory.js")(Service, Characteristic);
 
     homebridge.registerPlatform("homebridge-homee", "homee", HomeePlatform, false);
 };
@@ -28,7 +29,12 @@ class HomeePlatform {
      */
     constructor(log, config, api) {
         this.log = log;
-        this.homee = new Homee(config.host, config.user, config.pass);
+        this.homee = new Homee(config.host, config.user, config.pass, {
+            device: 'homebridge',
+            reconnect: true,
+            reconnectInterval: 5000,
+            maxRetries: Infinity
+        });
         this.nodes = [];
         this.homeegrams = [];
         this.foundAccessories = [];
@@ -95,6 +101,9 @@ class HomeePlatform {
                 this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1))
                 let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
                 newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
+            } else if (nodeType === 'RGBLightbulb') {
+                this.log.debug(name + ': ' + nodeType);
+                this.foundAccessories.push(new RgbLightbulbAccessory(name, uuid, node, this))
             } else if (nodeType) {
                 this.log.debug(name + ': ' + nodeType);
                 newAccessory = new HomeeAccessory(name, uuid, nodeType, node, this);

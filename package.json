@@ -1,6 +1,6 @@
 {
   "name": "homebridge-homee",
-  "version": "1.0.1",
+  "version": "0.3.0",
   "description": "homee platform plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
@@ -19,6 +19,7 @@
     "homebridge": ">=0.2.0"
   },
   "dependencies": {
+    "colorsys": "^1.0.21",
     "homee-api": "^0.9.7"
   }
 }
