@@ -17,7 +17,7 @@ class HomeeAccessory {
         this.map = [];
     }
 
-    setValue(value, callback, context, uuid, attributeId) {
+    setValue(value, callback, context, uuid, attribute) {
         if (context && context == 'ws') {
             callback(null, value);
             return;
@@ -27,7 +27,7 @@ class HomeeAccessory {
         if (value === false) value = 0;
 
         this.log.debug('Setting ' + this.name + ' to ' + value);
-        this.homee.setValue(this.nodeId, attributeId, value);
+        this.homee.setValue(this.nodeId, attribute.id, value);
 
         callback(null, value);
     }
@@ -60,7 +60,6 @@ class HomeeAccessory {
         // addCharacteristics
         for (let attribute of this.attributes) {
             let attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
-            let attributeId = attribute.id;
 
             // skip characteristic if instance doesn't match
             if (attributeType === 'On' && this.instance !== 0 && attribute.instance !== this.instance) continue;
@@ -83,7 +82,7 @@ class HomeeAccessory {
                     this.service.getCharacteristic(Characteristic[attributeType])
                         .on('set', function() {
                             var args = Array.prototype.slice.call(arguments);
-                            args.push(attributeId);
+                            args.push(attribute);
                             this.setValue.apply(this, args);
                         }.bind(this));
                 }
