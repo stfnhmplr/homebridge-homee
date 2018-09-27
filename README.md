@@ -43,25 +43,38 @@ This plugin integrates all (known) devices to homebridge by default. You can lim
 Homekit cannot manage more than 100 devices per bridge. If you have together more than 100 devices and homeegrams, you have to filter some of them with a group.
 
 ## Tested devices
+- Aeotec ZW075 Smart Switch Gen5
+- Aeotec ZW074 MultiSensor Gen5 
 - Danfoss Living connect Thermostat
 - Devolo Door/Window Sensor
 - Devolo Motion Sensor
 - Devolo Heizkörperthermostate
 - Devolo Smart Metering Plug
+- Enocean EOSC Presence Detector
 - Everspring AN180 Wall Plug
+- Everspring Plug AD 147
+- Everspring ST814 Temperature and Humidity Sensor
 - Fibaro Door/Window Sensor
-- Fibaro Double Switch
+- Fibaro Single Switch (213)
+- Fibaro Double Switch (223)
 - Fibaro Flood Sensor
 - Fibaro Motion Sensor
 - Fibaro Roller Shutter 2 (FGR-222)
 - Fibaro Smoke Sensor 2
 - Fibaro Wall Plug
 - Greenwave Powernode
+- IKEA Float LED Panel
+- IKEA Tradfri
+- Neo Coolcam Powerplug
+- Philio Door/Windowsensor
 - Philips Hue White and Color Ambiance
 - Philips Hue White
+- Philips Hue LED Stripe
 - Popp Rauchwarnmelder mit Sirene
 - Qubino Flush Dimmer
 - Sensative Stripes
+- Nuki
+- Netatmo Weather Station
 
 ## Donate
 <a href="https://www.buymeacoffee.com/himpler" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
