@@ -1,4 +1,3 @@
-const attributeTypes = require('../lib/attribute_types')
 const colorsys = require('colorsys')
 const ENUMS = require('../lib/enums.js');
 
@@ -150,10 +149,12 @@ class RgbLightbulbAccessory {
     }
 
     kelvinToMired(value) {
+        // TODO: rely on min/max
         return Math.round(1000000/value);
     }
 
     miredToKelvin(value) {
+        // TODO: rely on min/max
         return Math.round(1000000/value);
     }
 
@@ -167,30 +168,36 @@ class RgbLightbulbAccessory {
 
         this.service = new Service.Lightbulb(this.name);
 
-        this.service.getCharacteristic(Characteristic.Brightness)
-            .updateValue(this.attributes.brightness.current_value)
-            .on('set', this.setBrightness.bind(this));
-        this.log.debug(`Brightness: ${this.attributes.brightness.current_value}`);
-
-        this.service.getCharacteristic(Characteristic.ColorTemperature)
-            .updateValue(this.kelvinToMired(this.attributes.colorTemperature.current_value))
-            .on('set', this.setColorTemperature.bind(this));
-        this.log.debug(`ColorTemperature: ${this.attributes.colorTemperature.current_value}`);
-
-        this.service.getCharacteristic(Characteristic.Hue)
-            .updateValue(this._decimalToHsv(this.attributes.color.current_value).h)
-            .on('set', this.setHue.bind(this));
-        this.log.debug(`Hue: ${this._decimalToHsv(this.attributes.color.current_value).h}`);
-
         this.service.getCharacteristic(Characteristic.On)
             .updateValue(this.attributes.onOff.current_value)
             .on('set', this.setState.bind(this));
         this.log.debug(`Current State: ${this.attributes.onOff.current_value ? 'On' : 'Off'}`);
 
-        this.service.getCharacteristic(Characteristic.Saturation)
-            .updateValue(this._decimalToHsv(this.attributes.color.current_value).s)
-            .on('set', this.setSaturation.bind(this));
-        this.log.debug(`Saturation: ${this._decimalToHsv(this.attributes.color.current_value).s}`);
+        if (this.attributes.brightness) {
+            this.service.getCharacteristic(Characteristic.Brightness)
+                .updateValue(this.attributes.brightness.current_value)
+                .on('set', this.setBrightness.bind(this));
+            this.log.debug(`Brightness: ${this.attributes.brightness.current_value}`);
+        }
+
+        if (this.attributes.colorTemperature) {
+            this.service.getCharacteristic(Characteristic.ColorTemperature)
+                .updateValue(this.kelvinToMired(this.attributes.colorTemperature.current_value))
+                .on('set', this.setColorTemperature.bind(this));
+            this.log.debug(`ColorTemperature: ${this.attributes.colorTemperature.current_value}`);
+        }
+
+        if (this.attributes.color) {
+            this.service.getCharacteristic(Characteristic.Hue)
+                .updateValue(this._decimalToHsv(this.attributes.color.current_value).h)
+                .on('set', this.setHue.bind(this));
+            this.log.debug(`Hue: ${this._decimalToHsv(this.attributes.color.current_value).h}`);
+
+            this.service.getCharacteristic(Characteristic.Saturation)
+                .updateValue(this._decimalToHsv(this.attributes.color.current_value).s)
+                .on('set', this.setSaturation.bind(this));
+            this.log.debug(`Saturation: ${this._decimalToHsv(this.attributes.color.current_value).s}`);
+        }
 
         return [informationService, this.service];
     }
