@@ -20,6 +20,6 @@
   },
   "dependencies": {
     "colorsys": "^1.0.21",
-    "homee-api": "^0.9.7"
+    "homee-api": "^0.9.8"
   }
 }
