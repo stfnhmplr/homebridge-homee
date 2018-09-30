@@ -66,7 +66,7 @@ class HomeePlatform {
      */
     accessories (callback) {
         if (this.attempts > 5) {
-            this.log.warn("Can't get devices or homeegrams. Please check that homee is online and your config is right")
+            throw new Error("Can't get devices or homeegrams. Please check that homee is online and your config is right");
             callback([]);
             return;
         }
