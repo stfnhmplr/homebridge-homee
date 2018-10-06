@@ -57,6 +57,7 @@ class RgbLightbulbAccessory {
 
         this.log.debug(`setting hue to ${value}`)
         this.hsv.h = value;
+        this._setColor();
 
         callback(null, value);
     }
@@ -87,7 +88,7 @@ class RgbLightbulbAccessory {
     }
 
     setColorTemperature(value, callback, context) {
-        value = this.miredToKelvin(value)
+        value = this._miredToKelvin(value)
 
         this.log.debug(`Setting ${this.name} - ColorTemperature to ${value}`);
         this.homee.setValue(this.nodeId, this.attributes.colorTemperature.id, value);
@@ -121,12 +122,12 @@ class RgbLightbulbAccessory {
                 this.log.debug(`${this.name}: Color: ${JSON.stringify(this.hsv)}`);
                 break;
             case ENUMS.CAAttributeType.CAAttributeTypeColorTemperature:
-                if (this.kelvinToMired(attribute.current_value)
+                if (this._kelvinToMired(attribute.current_value)
                     != this.service.getCharacteristic(Characteristic.ColorTemperature).value
                     && attribute.current_value == attribute.target_value) {
                     this.service.getCharacteristic(Characteristic.ColorTemperature)
-                        .updateValue(this.kelvinToMired(attribute.current_value), null, 'ws');
-                    this.log.debug(`${this.name}: ColorTemperature: ${this.kelvinToMired(attribute.current_value)}`);
+                        .updateValue(this._kelvinToMired(attribute.current_value), null, 'ws');
+                    this.log.debug(`${this.name}: ColorTemperature: ${this._kelvinToMired(attribute.current_value)}`);
                 }
                 break;
             case ENUMS.CAAttributeType.CAAttributeTypeDimmingLevel:
@@ -148,14 +149,18 @@ class RgbLightbulbAccessory {
         }
     }
 
-    kelvinToMired(value) {
-        // TODO: rely on min/max
-        return Math.round(1000000/value);
+    _kelvinToMired(value) {
+        const min = this.attributes.colorTemperature.minimum,
+            max = this.attributes.colorTemperature.maximum
+
+        return Math.round(500 - (value - min) * 360 / (max - min))
     }
 
-    miredToKelvin(value) {
-        // TODO: rely on min/max
-        return Math.round(1000000/value);
+    _miredToKelvin(value) {
+        const min = this.attributes.colorTemperature.minimum,
+            max = this.attributes.colorTemperature.maximum
+
+        return Math.round(max - (value - 140) * (max - min) / 360)
     }
 
     getServices() {
@@ -168,11 +173,6 @@ class RgbLightbulbAccessory {
 
         this.service = new Service.Lightbulb(this.name);
 
-        this.service.getCharacteristic(Characteristic.On)
-            .updateValue(this.attributes.onOff.current_value)
-            .on('set', this.setState.bind(this));
-        this.log.debug(`Current State: ${this.attributes.onOff.current_value ? 'On' : 'Off'}`);
-
         if (this.attributes.brightness) {
             this.service.getCharacteristic(Characteristic.Brightness)
                 .updateValue(this.attributes.brightness.current_value)
@@ -182,7 +182,7 @@ class RgbLightbulbAccessory {
 
         if (this.attributes.colorTemperature) {
             this.service.getCharacteristic(Characteristic.ColorTemperature)
-                .updateValue(this.kelvinToMired(this.attributes.colorTemperature.current_value))
+                .updateValue(this._kelvinToMired(this.attributes.colorTemperature.current_value))
                 .on('set', this.setColorTemperature.bind(this));
             this.log.debug(`ColorTemperature: ${this.attributes.colorTemperature.current_value}`);
         }
