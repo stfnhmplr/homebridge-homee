@@ -1,9 +1,9 @@
 'use strict';
 
 let Accessory, Service, Characteristic, UUIDGen;
-const Homee = require("homee-api");
-const nodeTypes = require("./lib/node_types");
-let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory;
+const Homee = require('homee-api');
+const nodeTypes = require('./lib/node_types');
+let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory, SecuritySystemAccessory;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -11,15 +11,21 @@ module.exports = function(homebridge) {
     UUIDGen = homebridge.hap.uuid;
     Accessory = homebridge.platformAccessory;
 
-    HomeeAccessory = require("./accessories/HomeeAccessory.js")(Service, Characteristic);
-    WindowCoveringAccessory = require("./accessories/WindowCoveringAccessory.js")(Service, Characteristic);
-    HomeegramAccessory = require("./accessories/HomeegramAccessory.js")(Service, Characteristic);
+    HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
+    WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(
+        Service,
+        Characteristic
+    );
+    HomeegramAccessory = require('./accessories/HomeegramAccessory.js')(Service, Characteristic);
+    SecuritySystemAccessory = require('./accessories/SecuritySystemAccessory')(
+        Service,
+        Characteristic
+    );
 
-    homebridge.registerPlatform("homebridge-homee", "homee", HomeePlatform, false);
+    homebridge.registerPlatform('homebridge-homee', 'homee', HomeePlatform, false);
 };
 
 class HomeePlatform {
-
     /**
      * create a new instance
      * @param log
@@ -35,6 +41,7 @@ class HomeePlatform {
         this.attempts = 0;
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
+        this.alarmGroup = config.alarmGroup || 'Alarm';
 
         if (api) this.api = api;
 
@@ -45,9 +52,10 @@ class HomeePlatform {
             this.connected = false;
         });
 
-        this.homee.connect()
+        this.homee
+            .connect()
             .then(() => {
-                this.log("connected to homee");
+                this.log('connected to homee');
                 this.connected = true;
                 this.homee.send('GET:all');
             })
@@ -58,9 +66,11 @@ class HomeePlatform {
      * create accessories
      * @param callback
      */
-    accessories (callback) {
+    accessories(callback) {
         if (this.attempts > 5) {
-            this.log.warn("Can't get devices or homeegrams. Please check that homee is online and your config is right")
+            this.log.warn(
+                "Can't get devices or homeegrams. Please check that homee is online and your config is right"
+            );
             callback([]);
             return;
         }
@@ -68,7 +78,7 @@ class HomeePlatform {
         this.attempts++;
 
         if (!this.connected) {
-            this.log("Not connected to homee. Retrying...");
+            this.log('Not connected to homee. Retrying...');
             setTimeout(() => this.accessories(callback), 2000);
             return;
         }
@@ -80,7 +90,7 @@ class HomeePlatform {
         }
 
         for (let node of this.nodes) {
-            if (node.id < 1) continue;
+            if (node.id < 0) continue;
 
             let name = decodeURI(node.name);
             let uuid = UUIDGen.generate('homee-' + node.id);
@@ -92,7 +102,9 @@ class HomeePlatform {
                 newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
             } else if (nodeType === 'DoubleSwitch') {
                 this.log.debug(name + ': ' + nodeType);
-                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1))
+                this.foundAccessories.push(
+                    new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1)
+                );
                 let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
                 newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
             } else if (nodeType) {
@@ -103,8 +115,12 @@ class HomeePlatform {
             }
 
             if (newAccessory) this.foundAccessories.push(newAccessory);
-
         }
+
+        // Security System
+        this.foundAccessories.push(
+            new SecuritySystemAccessory('Alarm', UUIDGen.generate('homee'), this.alarmGroup, this)
+        );
 
         for (let homeegram of this.homeegrams) {
             let name = decodeURI(homeegram.name);
@@ -124,11 +140,11 @@ class HomeePlatform {
      * @param all
      * @returns {*[]}
      */
-    filterDevices (all) {
+    filterDevices(all) {
         let groupId;
         let nodeIds = [];
         let homeegramIds = [];
-        let filtered = {nodes: [], homeegrams: []};
+        let filtered = { nodes: [], homeegrams: [] };
 
         for (let group of all.groups) {
             if (group.name.match(new RegExp('^' + this.groupName + '$', 'i'))) {
@@ -174,7 +190,7 @@ class HomeePlatform {
                 let accessory = this.foundAccessories.find(a => a.nodeId === attribute.node_id);
                 if (accessory) {
                     accessory.updateValue(attribute);
-                    this.log.info('Updated accessory %s', accessory.name)
+                    this.log.info('Updated accessory %s', accessory.name);
                 }
             }
         }
