@@ -25,6 +25,6 @@
     "singleQuote": true,
     "tabWidth": 4,
     "trailingComma": true,
-    "printWidth": 100
+    "printWidth": 120
   }
 }
