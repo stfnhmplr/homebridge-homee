@@ -12,15 +12,9 @@ module.exports = function(homebridge) {
     Accessory = homebridge.platformAccessory;
 
     HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
-    WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(
-        Service,
-        Characteristic
-    );
+    WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(Service, Characteristic);
     HomeegramAccessory = require('./accessories/HomeegramAccessory.js')(Service, Characteristic);
-    SecuritySystemAccessory = require('./accessories/SecuritySystemAccessory')(
-        Service,
-        Characteristic
-    );
+    SecuritySystemAccessory = require('./accessories/SecuritySystemAccessory')(Service, Characteristic);
 
     homebridge.registerPlatform('homebridge-homee', 'homee', HomeePlatform, false);
 };
@@ -41,7 +35,7 @@ class HomeePlatform {
         this.attempts = 0;
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
-        this.alarmGroup = config.alarmGroup || 'Alarm';
+        this.alarmGroup = config.alarmGroup || null;
 
         if (api) this.api = api;
 
@@ -102,9 +96,7 @@ class HomeePlatform {
                 newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
             } else if (nodeType === 'DoubleSwitch') {
                 this.log.debug(name + ': ' + nodeType);
-                this.foundAccessories.push(
-                    new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1)
-                );
+                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1));
                 let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
                 newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
             } else if (nodeType) {
@@ -117,10 +109,12 @@ class HomeePlatform {
             if (newAccessory) this.foundAccessories.push(newAccessory);
         }
 
-        // Security System
-        this.foundAccessories.push(
-            new SecuritySystemAccessory('Alarm', UUIDGen.generate('homee'), this.alarmGroup, this)
-        );
+        // Security System (only when alarm group is set)
+        if (this.alarmGroup) {
+            this.foundAccessories.push(
+                new SecuritySystemAccessory('Alarm', UUIDGen.generate('homee'), this.alarmGroup, this)
+            );
+        }
 
         for (let homeegram of this.homeegrams) {
             let name = decodeURI(homeegram.name);
