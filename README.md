@@ -31,7 +31,8 @@ Example:
                 "host": "192.168.178.1",
                 "user": "your-username",
                 "pass": "your-password",
-                "groupName": "group-name"
+                "groupName": "group-name",
+                "alarmGroup": "AlarmGroupName"
             }
         ]
     }
@@ -41,6 +42,20 @@ This plugin integrates all (known) devices to homebridge by default. You can lim
 
 ### Device Limit
 Homekit cannot manage more than 100 devices per bridge. If you have together more than 100 devices and homeegrams, you have to filter some of them with a group.
+
+## Security System
+You can activate a security system. Just create an alarm group in homee and add it to your config file. Possible triggers are e.g. motion detectors, smoke detectors, leak detectors and so on. You can add as many triggers as you like. In combination with the presence status in homee, the selected sensors can trigger an alarm in HomeKit.
+ 
+ The manipulation alarm of the sensors is also transmitted to HomeKit.
+ 
+ Since the presence states cannot be matched one to one with homee, the following mapping is carried out:
+ 
+ | homee  | Homekit  |
+ |---|---|
+ | Home | Disarmed |
+ | Sleeping | Night Armed |
+ | Away | Stay Armed |
+ | Holiday | Away Armed |
 
 ## Tested devices
 - Danfoss Living connect Thermostat
