@@ -1,12 +1,21 @@
 let Service, Characteristic;
 
 class SecuritySystemAccessory {
+    /**
+     * SecuritySystem accessory based on homee mode and several devices in a specific group
+     * @param name
+     * @param uuid
+     * @param alarmGroup
+     * @param platform
+     */
     constructor(name, uuid, alarmGroup, platform) {
         this.name = name;
         this.uuid = uuid;
         this.platform = platform;
         this.log = platform.log;
         this.homee = platform.homee;
+
+        // attribute types to detect within the alarm group
         this.attributeTypes = [
             this.homee.enums.CAAttributeType.CAAttributeTypeFloodAlarm,
             this.homee.enums.CAAttributeType.CAAttributeTypeSiren,
@@ -68,9 +77,7 @@ class SecuritySystemAccessory {
         const attributeIndex = this.alarmAttributes.findIndex(a => a.id === attribute.id);
         this.alarmAttributes[attributeIndex] = attribute;
 
-        const characteristic = this.service.getCharacteristic(
-            Characteristic.SecuritySystemCurrentState
-        );
+        const characteristic = this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState);
         const DISARMED = Characteristic.SecuritySystemCurrentState.DISARMED;
         const ALARM_TRIGGERED = Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED;
 
@@ -84,9 +91,7 @@ class SecuritySystemAccessory {
                 characteristic.updateValue(ALARM_TRIGGERED, null, 'ws');
             } else if (!this.currentAlarmState && characteristic.value === ALARM_TRIGGERED) {
                 this.log.info(`resetting alarm state`);
-                characteristic.updateValue(
-                    this.getHapSecurityStateByHomeeMode(this.homeeModeAttribute.current_value)
-                );
+                characteristic.updateValue(this.getHapSecurityStateByHomeeMode(this.homeeModeAttribute.current_value));
             }
         }
 
@@ -102,9 +107,7 @@ class SecuritySystemAccessory {
         this.tamperAlarmAttributes[attributeIndex] = attribute;
 
         const characteristic = this.service.getCharacteristic(Characteristic.StatusTampered);
-        this.currentTamperAlarmState = this.tamperAlarmAttributes
-            .map(a => a.current_value)
-            .some(v => v > 0);
+        this.currentTamperAlarmState = this.tamperAlarmAttributes.map(a => a.current_value).some(v => v > 0);
 
         if (
             this.currentTamperAlarmState !== this.oldTamperAlarmState &&
@@ -121,18 +124,20 @@ class SecuritySystemAccessory {
      * @param attribute
      */
     updateSecurityState(attribute) {
-        const characteristic = this.service.getCharacteristic(
-            Characteristic.SecuritySystemCurrentState
-        );
+        const currentState = this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState);
+        const targetState = this.service.getCharacteristic(Characteristic.SecuritySystemTargetState);
+        const hapTargetState = this.getHapSecurityStateByHomeeMode(attribute.target_value);
+        const hapCurrentState = this.getHapSecurityStateByHomeeMode(attribute.current_value);
 
-        if (
-            attribute.current_value !== attribute.target_value ||
-            (attribute.current_value !== 0 &&
-                characteristic.value === characteristic.ALARM_TRIGGERED)
-        )
-            return;
+        if (targetState.value !== hapTargetState) {
+            targetState.updateValue(hapTargetState);
+            this.log.debug(`update SecuritySystem target state to ${hapTargetState}`);
+        }
 
-        characteristic.updateValue(this.getHapSecurityStateByHomeeMode(attribute.current_value));
+        if (currentState.value !== hapCurrentState) {
+            currentState.updateValue(hapCurrentState);
+            this.log.debug(`update SecuritySystem current state to ${hapCurrentState}`);
+        }
     }
 
     /**
@@ -144,7 +149,7 @@ class SecuritySystemAccessory {
         const states = {
             0: Characteristic.SecuritySystemCurrentState.DISARMED,
             1: Characteristic.SecuritySystemCurrentState.NIGHT_ARM,
-            2: Characteristic.SecuritySystemCurrentState.AWAY_ARM,
+            2: Characteristic.SecuritySystemCurrentState.STAY_ARM,
             3: Characteristic.SecuritySystemCurrentState.AWAY_ARM,
         };
 
@@ -159,7 +164,7 @@ class SecuritySystemAccessory {
     getHomeeModeByHapSecurityState(state) {
         const states = {};
         states[Characteristic.SecuritySystemCurrentState.STAY_ARM] = 2;
-        states[Characteristic.SecuritySystemCurrentState.AWAY_ARM] = 2;
+        states[Characteristic.SecuritySystemCurrentState.AWAY_ARM] = 3;
         states[Characteristic.SecuritySystemCurrentState.NIGHT_ARM] = 1;
         states[Characteristic.SecuritySystemCurrentState.DISARMED] = 0;
 
@@ -182,9 +187,7 @@ class SecuritySystemAccessory {
 
         this.service
             .getCharacteristic(Characteristic.SecuritySystemCurrentState)
-            .updateValue(
-                this.getHapSecurityStateByHomeeMode(this.homeeModeAttribute.current_value)
-            );
+            .updateValue(this.getHapSecurityStateByHomeeMode(this.homeeModeAttribute.current_value));
 
         this.service
             .getCharacteristic(Characteristic.SecuritySystemTargetState)
