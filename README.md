@@ -31,7 +31,8 @@ Example:
                 "host": "192.168.178.1",
                 "user": "your-username",
                 "pass": "your-password",
-                "groupName": "group-name"
+                "groupName": "group-name",
+                "safeGuard": true
             }
         ]
     }
