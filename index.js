@@ -61,13 +61,7 @@ class HomeePlatform {
      */
     accessories (callback) {
         if (this.attempts > 5) {
-            this.log.warn("Can't get devices or homeegrams. Please check that homee is online and your config is right");
-            if (this.safeGuard) {
-                this.log.warn("Safeguard active - aborting Homebridge startup");
-                throw new Error("Safeguard active - aborting Homebridge startup");
-            }
-            callback([]);
-            return;
+            throw new Error("Can't get devices or homeegrams. Please check that homee is online and your config is ok");
         }
 
         this.attempts++;
