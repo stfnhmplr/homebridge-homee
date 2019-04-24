@@ -31,7 +31,8 @@ Example:
                 "host": "192.168.178.1",
                 "user": "your-username",
                 "pass": "your-password",
-                "groupName": "group-name"
+                "groupName": "group-name",
+                "safeGuard": true
             }
         ]
     }
@@ -41,6 +42,9 @@ This plugin integrates all (known) devices to homebridge by default. You can lim
 
 ### Device Limit
 Homekit cannot manage more than 100 devices per bridge. If you have together more than 100 devices and homeegrams, you have to filter some of them with a group.
+
+### Safeguard Mode
+In certain cases, this plugin may not be able to establish a connection to your homee during startup. This could happen if, for instance, your homee is not running during Homebridge startup or if your local network is down. As Homebridge will continue anyway, this usually results in all homee devices being removed from HomeKit, including all scenes and automation. By setting the optional 'safeGuard' option to true (default: false), you can prevent Homebridge from starting up whenever a connection to your homee cannot be established or when the number of homee devices is zero.
 
 ## Tested devices
 - Danfoss Living connect Thermostat
