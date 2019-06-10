@@ -1,8 +1,8 @@
 'use strict';
 
 let Accessory, Service, Characteristic, UUIDGen;
-const Homee = require("homee-api");
-const nodeTypes = require("./lib/node_types");
+const Homee = require('homee-api');
+const nodeTypes = require('./lib/node_types');
 let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory;
 
 module.exports = function(homebridge) {
@@ -11,15 +11,17 @@ module.exports = function(homebridge) {
     UUIDGen = homebridge.hap.uuid;
     Accessory = homebridge.platformAccessory;
 
-    HomeeAccessory = require("./accessories/HomeeAccessory.js")(Service, Characteristic);
-    WindowCoveringAccessory = require("./accessories/WindowCoveringAccessory.js")(Service, Characteristic);
-    HomeegramAccessory = require("./accessories/HomeegramAccessory.js")(Service, Characteristic);
+    HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
+    WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(
+        Service,
+        Characteristic
+    );
+    HomeegramAccessory = require('./accessories/HomeegramAccessory.js')(Service, Characteristic);
 
-    homebridge.registerPlatform("homebridge-homee", "homee", HomeePlatform, false);
+    homebridge.registerPlatform('homebridge-homee', 'homee', HomeePlatform, false);
 };
 
 class HomeePlatform {
-
     /**
      * create a new instance
      * @param log
@@ -45,9 +47,10 @@ class HomeePlatform {
             this.connected = false;
         });
 
-        this.homee.connect()
+        this.homee
+            .connect()
             .then(() => {
-                this.log("connected to homee");
+                this.log('connected to homee');
                 this.connected = true;
                 this.homee.send('GET:all');
             })
@@ -58,15 +61,17 @@ class HomeePlatform {
      * create accessories
      * @param callback
      */
-    accessories (callback) {
+    accessories(callback) {
         if (this.attempts > 10) {
-            throw new Error("Can't get devices or homeegrams. Please check that homee is online and your config is ok");
+            throw new Error(
+                "Can't get devices or homeegrams. Please check that homee is online and your config is ok"
+            );
         }
 
         this.attempts++;
 
         if (!this.connected) {
-            this.log("Not connected to homee. Retrying...");
+            this.log('Not connected to homee. Retrying...');
             setTimeout(() => this.accessories(callback), 2000);
             return;
         }
@@ -90,7 +95,9 @@ class HomeePlatform {
                 newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
             } else if (nodeType === 'DoubleSwitch') {
                 this.log.debug(name + ': ' + nodeType);
-                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1))
+                this.foundAccessories.push(
+                    new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1)
+                );
                 let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
                 newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
             } else if (nodeType) {
@@ -101,7 +108,6 @@ class HomeePlatform {
             }
 
             if (newAccessory) this.foundAccessories.push(newAccessory);
-
         }
 
         for (let homeegram of this.homeegrams) {
@@ -122,11 +128,11 @@ class HomeePlatform {
      * @param all
      * @returns {*[]}
      */
-    filterDevices (all) {
+    filterDevices(all) {
         let groupId;
         let nodeIds = [];
         let homeegramIds = [];
-        let filtered = {nodes: [], homeegrams: []};
+        let filtered = { nodes: [], homeegrams: [] };
 
         for (let group of all.groups) {
             if (group.name.match(new RegExp('^' + this.groupName + '$', 'i'))) {
@@ -135,8 +141,10 @@ class HomeePlatform {
         }
 
         if (!groupId) {
-            if (this.groupName !== "homebridge") {
-                throw new Error("Specified group not found. Aborting Homebridge startup to prevent lost of accessories");
+            if (this.groupName !== 'homebridge') {
+                throw new Error(
+                    'Specified group not found. Aborting Homebridge startup to prevent lost of accessories'
+                );
             } else {
                 return [all.nodes, all.homeegrams];
             }
@@ -178,7 +186,7 @@ class HomeePlatform {
                 let accessory = this.foundAccessories.find(a => a.nodeId === attribute.node_id);
                 if (accessory) {
                     accessory.updateValue(attribute);
-                    this.log.info('Updated accessory %s', accessory.name)
+                    this.log.info('Updated accessory %s', accessory.name);
                 }
             }
         }

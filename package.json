@@ -14,6 +14,12 @@
   "bugs": {
     "url": "http://github.com/stfnhmplr/homebridge-homee/issues"
   },
+  "prettier": {
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "printWidth": 100
+  },
   "engines": {
     "node": ">=6.0.0",
     "homebridge": ">=0.4.0"
