@@ -61,12 +61,10 @@ class HomeePlatform {
      * @param callback
      */
     accessories(callback) {
-        if (this.attempts > 5) {
-            this.log.warn(
-                "Can't get devices or homeegrams. Please check that homee is online and your config is right"
+        if (this.attempts > 10) {
+            throw new Error(
+                "Can't get devices or homeegrams. Please check that homee is online and your config is ok"
             );
-            callback([]);
-            return;
         }
 
         this.attempts++;
@@ -96,7 +94,9 @@ class HomeePlatform {
                 newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
             } else if (nodeType === 'DoubleSwitch') {
                 this.log.debug(name + ': ' + nodeType);
-                this.foundAccessories.push(new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1));
+                this.foundAccessories.push(
+                    new HomeeAccessory(name + '-1', uuid, 'Switch', node, this, 1)
+                );
                 let uuid2 = UUIDGen.generate('homee-' + node.id + '2');
                 newAccessory = new HomeeAccessory(name + '-2', uuid2, 'Switch', node, this, 2);
             } else if (nodeType) {
@@ -146,7 +146,15 @@ class HomeePlatform {
             }
         }
 
-        if (!groupId) return [all.nodes, all.homeegrams];
+        if (!groupId) {
+            if (this.groupName !== 'homebridge') {
+                throw new Error(
+                    'Specified group not found. Aborting Homebridge startup to prevent lost of accessories'
+                );
+            } else {
+                return [all.nodes, all.homeegrams];
+            }
+        }
 
         for (let relationship of all.relationships) {
             if (relationship.group_id === groupId) {
