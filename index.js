@@ -35,7 +35,6 @@ class HomeePlatform {
         this.attempts = 0;
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
-        this.safeGuard = config.safeGuard || false;
 
         if (api) this.api = api;
 
@@ -136,9 +135,8 @@ class HomeePlatform {
         }
 
         if (!groupId) {
-            if (this.groupName !== "homebridge" && this.safeGuard) {
-                this.log.warn("Specified group not found. Safeguard active - aborting Homebridge startup");
-                throw new Error("Safeguard active - aborting Homebridge startup");
+            if (this.groupName !== "homebridge") {
+                throw new Error("Specified group not found. Aborting Homebridge startup to prevent lost of accessories");
             } else {
                 return [all.nodes, all.homeegrams];
             }
