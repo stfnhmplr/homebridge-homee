@@ -60,7 +60,7 @@ class HomeePlatform {
      * @param callback
      */
     accessories (callback) {
-        if (this.attempts > 5) {
+        if (this.attempts > 10) {
             throw new Error("Can't get devices or homeegrams. Please check that homee is online and your config is ok");
         }
 
