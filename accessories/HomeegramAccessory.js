@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 let Service, Characteristic;
 
@@ -23,31 +23,33 @@ class HomeegramAccessory {
 
         callback(null, true);
 
-        setTimeout(() => { //simulate button behaviour
+        setTimeout(() => {
+            //simulate button behaviour
             this.service.getCharacteristic(Characteristic.On).updateValue(false);
         }, 1000);
     }
 
     getState(callback) {
-        callback(null, false)
+        callback(null, false);
     }
 
     getServices() {
         let informationService = new Service.AccessoryInformation();
 
         informationService
-            .setCharacteristic(Characteristic.Manufacturer, "Homee")
-            .setCharacteristic(Characteristic.Model, "Homeegram")
-            .setCharacteristic(Characteristic.SerialNumber, "");
+            .setCharacteristic(Characteristic.Manufacturer, 'Homee')
+            .setCharacteristic(Characteristic.Model, 'Homeegram')
+            .setCharacteristic(Characteristic.SerialNumber, '');
 
-        this.service = new Service.Switch;
+        this.service = new Service.Switch();
 
-        this.service.getCharacteristic(Characteristic.On)
+        this.service
+            .getCharacteristic(Characteristic.On)
             .on('get', this.getState.bind(this))
             .on('set', this.playHomeegram.bind(this));
 
         return [informationService, this.service];
-    };
+    }
 }
 
 module.exports = function(oService, oCharacteristic) {
