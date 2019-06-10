@@ -3,7 +3,7 @@
 let Accessory, Service, Characteristic, UUIDGen;
 const Homee = require('homee-api');
 const nodeTypes = require('./lib/node_types');
-let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory;
+let HomeeAccessory, WindowCoveringAccessory, HomeegramAccessory, SecuritySystemAccessory;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -12,11 +12,9 @@ module.exports = function(homebridge) {
     Accessory = homebridge.platformAccessory;
 
     HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
-    WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(
-        Service,
-        Characteristic
-    );
+    WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(Service, Characteristic);
     HomeegramAccessory = require('./accessories/HomeegramAccessory.js')(Service, Characteristic);
+    SecuritySystemAccessory = require('./accessories/SecuritySystemAccessory')(Service, Characteristic);
 
     homebridge.registerPlatform('homebridge-homee', 'homee', HomeePlatform, false);
 };
@@ -37,6 +35,7 @@ class HomeePlatform {
         this.attempts = 0;
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
+        this.alarmGroup = config.alarmGroup || null;
 
         if (api) this.api = api;
 
@@ -83,7 +82,7 @@ class HomeePlatform {
         }
 
         for (let node of this.nodes) {
-            if (node.id < 1) continue;
+            if (node.id < 0) continue;
 
             let name = decodeURI(node.name);
             let uuid = UUIDGen.generate('homee-' + node.id);
@@ -108,6 +107,13 @@ class HomeePlatform {
             }
 
             if (newAccessory) this.foundAccessories.push(newAccessory);
+        }
+
+        // Security System (only when alarm group is set)
+        if (this.alarmGroup) {
+            this.foundAccessories.push(
+                new SecuritySystemAccessory('Alarm', UUIDGen.generate('homee'), this.alarmGroup, this)
+            );
         }
 
         for (let homeegram of this.homeegrams) {

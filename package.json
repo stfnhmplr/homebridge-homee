@@ -26,5 +26,11 @@
   },
   "dependencies": {
     "homee-api": "^0.11.1"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": true,
+    "printWidth": 120
   }
 }
