@@ -3,7 +3,7 @@ const nodeTypes = require('./lib/node_types');
 
 let Characteristic;
 let Service;
-let Uuid;
+let uuid;
 
 let HomeeAccessory;
 let WindowCoveringAccessory;
@@ -71,24 +71,22 @@ class HomeePlatform {
       if (node.id < 1) return;
 
       const name = decodeURI(node.name);
-      const uuid = Uuid.generate(`homee-${node.id}`);
       let newAccessory;
       const nodeType = nodeTypes.getAccessoryTypeByNodeProfile(node.profile);
 
       if (nodeType === 'WindowCovering') {
         this.log.debug(`${name}: ${nodeType}`);
-        newAccessory = new WindowCoveringAccessory(name, uuid, nodeType, node, this);
+        newAccessory = new WindowCoveringAccessory(name, uuid.generate(`homee-${node.id}`), nodeType, node, this);
       } else if (nodeType === 'DoubleSwitch') {
         this.log.debug(`${name}: ${nodeType}`);
-        this.foundAccessories.push(new HomeeAccessory(`${name}-1`, uuid, 'Switch', node, this, 1));
-        const uuid2 = Uuid.generate(`homee-${node.id}2`);
-        newAccessory = new HomeeAccessory(`${name}-2`, uuid2, 'Switch', node, this, 2);
+        this.foundAccessories.push(new HomeeAccessory(`${name}-1`, uuid.generate(`homee-${node.id}`), 'Switch', node, this, 1));
+        newAccessory = new HomeeAccessory(`${name}-2`, uuid.generate(`homee-${node.id}-2`), 'Switch', node, this, 2);
       } else if (nodeType === 'RGBLightbulb') {
         this.log.debug(`${name}: ${nodeType}`);
-        this.foundAccessories.push(new RgbLightbulbAccessory(name, uuid, node, this));
+        this.foundAccessories.push(new RgbLightbulbAccessory(name, uuid.generate(`homee-${node.id}`), node, this));
       } else if (nodeType) {
         this.log.debug(`${name}: ${nodeType}`);
-        newAccessory = new HomeeAccessory(name, uuid, nodeType, node, this);
+        newAccessory = new HomeeAccessory(name, uuid.generate(`homee-${node.id}`), nodeType, node, this);
       } else {
         this.log.debug(`${name}: unknown Accessory Type`);
       }
@@ -98,11 +96,10 @@ class HomeePlatform {
 
     this.homeegrams.forEach((homeegram) => {
       const name = decodeURI(homeegram.name);
-      const uuid = Uuid.generate(`homee-hg-${homeegram.id}`);
       let newAccessory = '';
 
       this.log.debug(`${name}: Homeegram`);
-      newAccessory = new HomeegramAccessory(name, uuid, homeegram, this);
+      newAccessory = new HomeegramAccessory(name, uuid.generate(`homee-hg-${homeegram.id}`), homeegram, this);
       this.foundAccessories.push(newAccessory);
     });
 
@@ -172,7 +169,7 @@ class HomeePlatform {
 }
 
 module.exports = (homebridge) => {
-  ({ Characteristic, Service, Uuid } = homebridge.hap);
+  ({ Characteristic, Service, uuid } = homebridge.hap);
 
   // eslint-disable-next-line global-require
   HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
