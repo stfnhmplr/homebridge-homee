@@ -1,7 +1,6 @@
 const attributeTypes = require('../lib/attribute_types');
 
-let Service; let
-  Characteristic;
+let Service; let Characteristic;
 
 class HomeeAccessory {
   constructor(name, uuid, profile, node, platform, instance) {
@@ -23,11 +22,18 @@ class HomeeAccessory {
       return;
     }
 
-    if (value === true) value = 1;
-    if (value === false) value = 0;
+    let newValue;
 
-    this.log.debug(`Setting ${this.name} to ${value}`);
-    this.homee.setValue(this.nodeId, attribute.id, value);
+    if (value === true) {
+      newValue = 1;
+    } else if (value === false) {
+      newValue = 0;
+    } else {
+      newValue = value;
+    }
+
+    this.log.debug(`Setting ${this.name} to ${newValue}`);
+    this.homee.setValue(this.nodeId, attribute.id, newValue);
 
     callback(null, value);
   }

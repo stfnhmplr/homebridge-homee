@@ -174,9 +174,13 @@ class HomeePlatform {
 module.exports = (homebridge) => {
   ({ Characteristic, Service, Uuid } = homebridge.hap);
 
+  // eslint-disable-next-line global-require
   HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
+  // eslint-disable-next-line global-require
   WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(Service, Characteristic);
+  // eslint-disable-next-line global-require
   HomeegramAccessory = require('./accessories/HomeegramAccessory.js')(Service, Characteristic);
+  // eslint-disable-next-line global-require
   RgbLightbulbAccessory = require('./accessories/RgbLightbulbAccessory.js')(Service, Characteristic);
 
   homebridge.registerPlatform('homebridge-homee', 'homee', HomeePlatform, false);
