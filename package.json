@@ -7,6 +7,10 @@
     "homebridge-plugin",
     "homee"
   ],
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint .",
+    "lint:fix": "npm run lint -- --fix"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/stfnhmplr/homebridge-homee.git"
@@ -15,11 +19,16 @@
     "url": "http://github.com/stfnhmplr/homebridge-homee/issues"
   },
   "engines": {
-    "node": ">=6.0.0",
+    "node": ">=10.0.0",
     "homebridge": ">=0.2.0"
   },
   "dependencies": {
     "colorsys": "^1.0.21",
     "homee-api": "^0.9.8"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1"
   }
 }

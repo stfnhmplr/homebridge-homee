@@ -1,58 +1,58 @@
-'use strict'
-
-let Service, Characteristic;
+let Service;
+let Characteristic;
 
 class HomeegramAccessory {
-    constructor(name, uuid, homeegram, platform) {
-        this.name = name;
-        this.uuid = uuid;
-        this.platform = platform;
-        this.homee = platform.homee;
-        this.log = platform.log;
-        this.homeegram = homeegram;
+  constructor(name, uuid, homeegram, platform) {
+    this.name = name;
+    this.uuid = uuid;
+    this.platform = platform;
+    this.homee = platform.homee;
+    this.log = platform.log;
+    this.homeegram = homeegram;
+  }
+
+  playHomeegram(state, callback) {
+    if (!state) {
+      callback(null, false);
+      return;
     }
 
-    playHomeegram(state, callback) {
-        if (!state) {
-            callback(null, false);
-            return;
-        }
+    this.log.debug(`Playing ${this.name}`);
+    this.homee.play(this.homeegram.id);
 
-        this.log.debug('Playing ' + this.name);
-        this.homee.play(this.homeegram.id);
+    callback(null, true);
 
-        callback(null, true);
+    setTimeout(() => { // simulate button behaviour
+      this.service.getCharacteristic(Characteristic.On).updateValue(false);
+    }, 1000);
+  }
 
-        setTimeout(() => { //simulate button behaviour
-            this.service.getCharacteristic(Characteristic.On).updateValue(false);
-        }, 1000);
-    }
+  // eslint-disable-next-line class-methods-use-this
+  getState(callback) {
+    callback(null, false);
+  }
 
-    getState(callback) {
-        callback(null, false)
-    }
+  getServices() {
+    const informationService = new Service.AccessoryInformation();
 
-    getServices() {
-        let informationService = new Service.AccessoryInformation();
+    informationService
+      .setCharacteristic(Characteristic.Manufacturer, 'Homee')
+      .setCharacteristic(Characteristic.Model, 'Homeegram')
+      .setCharacteristic(Characteristic.SerialNumber, '');
 
-        informationService
-            .setCharacteristic(Characteristic.Manufacturer, "Homee")
-            .setCharacteristic(Characteristic.Model, "Homeegram")
-            .setCharacteristic(Characteristic.SerialNumber, "");
+    this.service = new Service.Switch();
 
-        this.service = new Service.Switch;
+    this.service.getCharacteristic(Characteristic.On)
+      .on('get', this.getState.bind(this))
+      .on('set', this.playHomeegram.bind(this));
 
-        this.service.getCharacteristic(Characteristic.On)
-            .on('get', this.getState.bind(this))
-            .on('set', this.playHomeegram.bind(this));
-
-        return [informationService, this.service];
-    };
+    return [informationService, this.service];
+  }
 }
 
-module.exports = function(oService, oCharacteristic) {
-    Service = oService;
-    Characteristic = oCharacteristic;
+module.exports = (oService, oCharacteristic) => {
+  Service = oService;
+  Characteristic = oCharacteristic;
 
-    return HomeegramAccessory;
+  return HomeegramAccessory;
 };
