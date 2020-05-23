@@ -22,15 +22,7 @@ class HomeeAccessory {
       return;
     }
 
-    let newValue;
-
-    if (value === true) {
-      newValue = 1;
-    } else if (value === false) {
-      newValue = 0;
-    } else {
-      newValue = value;
-    }
+    const newValue = typeof value === 'boolean' ? +value : value;
 
     this.log.debug(`Setting ${this.name} to ${newValue}`);
     this.homee.setValue(this.nodeId, attribute.id, newValue);
@@ -56,7 +48,7 @@ class HomeeAccessory {
     const informationService = new Service.AccessoryInformation();
 
     informationService
-      .setCharacteristic(Characteristic.Manufacturer, 'Homee')
+      .setCharacteristic(Characteristic.Manufacturer, 'homee')
       .setCharacteristic(Characteristic.Model, '')
       .setCharacteristic(Characteristic.SerialNumber, '');
 
@@ -65,6 +57,7 @@ class HomeeAccessory {
     // addCharacteristics
     this.attributes.forEach((attribute) => {
       const attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
+      if (!attributeType) return;
 
       // skip characteristic if instance doesn't match
       if (attributeType === 'On' && this.instance !== 0 && attribute.instance !== this.instance) return;
@@ -72,24 +65,23 @@ class HomeeAccessory {
       // ensure that characteristic 'On' is unique --> Fibaro FGS 213
       if (attributeType === 'On' && this.map.indexOf(Characteristic.On) > -1) return;
 
-      if (attributeType) {
-        this.log.debug(`${attributeType}: ${attribute.current_value}`);
-        this.map[attribute.id] = Characteristic[attributeType];
+      this.log.debug(`${attributeType}: ${attribute.current_value}`);
+      this.map[attribute.id] = Characteristic[attributeType];
 
-        if (!this.service.getCharacteristic(Characteristic[attributeType])) {
-          this.service.addCharacteristic(Characteristic[attributeType]);
-        }
+      this.service.getCharacteristic(Characteristic[attributeType])
+        .setProps({
+          minValue: attribute.minimum,
+          maxValue: attribute.maximum,
+          minStep: attribute.step_value,
+        })
+        .updateValue(attribute.current_value);
 
+      if (attribute.editable) {
         this.service.getCharacteristic(Characteristic[attributeType])
-          .updateValue(attribute.current_value);
-
-        if (attribute.editable) {
-          this.service.getCharacteristic(Characteristic[attributeType])
-            .on('set', (...args) => {
-              args.push(attribute);
-              this.setValue(...args);
-            });
-        }
+          .on('set', (...args) => {
+            args.push(attribute);
+            this.setValue(...args);
+          });
       }
     });
 
