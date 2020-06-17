@@ -189,12 +189,14 @@ class RgbLightbulbAccessory {
       this.log.debug(`Brightness: ${this.attributes.brightness.current_value}`);
     }
 
+    /*
     if (this.attributes.colorTemperature) {
       this.service.getCharacteristic(Characteristic.ColorTemperature)
         .updateValue(this.kelvinToMired(this.attributes.colorTemperature.current_value))
         .on('set', this.setColorTemperature.bind(this));
       this.log.debug(`ColorTemperature: ${this.attributes.colorTemperature.current_value}`);
     }
+    */
 
     if (this.attributes.color) {
       this.service.getCharacteristic(Characteristic.Hue)
