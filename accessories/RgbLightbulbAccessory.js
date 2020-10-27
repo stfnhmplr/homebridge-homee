@@ -113,7 +113,7 @@ class RgbLightbulbAccessory {
     this.log.debug(`Setting ${this.name}s state to ${newValue}`);
     this.homee.setValue(this.nodeId, this.attributes.onOff.id, newValue);
 
-    callback(null, value);
+    callback(null, newValue);
   }
 
   updateValue(attribute) {
