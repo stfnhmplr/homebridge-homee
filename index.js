@@ -5,10 +5,11 @@ let Characteristic;
 let Service;
 let uuid;
 
+let GarageDoorAccessory;
 let HomeeAccessory;
-let WindowCoveringAccessory;
 let HomeegramAccessory;
 let RgbLightbulbAccessory;
+let WindowCoveringAccessory;
 
 class HomeePlatform {
   constructor(log, config, api) {
@@ -84,6 +85,9 @@ class HomeePlatform {
       } else if (nodeType === 'RGBLightbulb') {
         this.log.debug(`${name}: ${nodeType}`);
         this.foundAccessories.push(new RgbLightbulbAccessory(name, uuid.generate(`homee-${node.id}`), node, this));
+      } else if (nodeType === 'GarageDoor') {
+        this.log.debug(`${name}: ${nodeType}`);
+        this.foundAccessories.push(new GarageDoorAccessory(name, uuid.generate(`homee-${node.id}`), node, this));
       } else if (nodeType) {
         this.log.debug(`${name}: ${nodeType}`);
         newAccessory = new HomeeAccessory(name, uuid.generate(`homee-${node.id}`), nodeType, node, this);
@@ -172,13 +176,15 @@ module.exports = (homebridge) => {
   ({ Characteristic, Service, uuid } = homebridge.hap);
 
   // eslint-disable-next-line global-require
-  HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
+  GarageDoorAccessory = require('./accessories/GarageDoorAccessory.js')(Service, Characteristic);
   // eslint-disable-next-line global-require
-  WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(Service, Characteristic);
+  HomeeAccessory = require('./accessories/HomeeAccessory.js')(Service, Characteristic);
   // eslint-disable-next-line global-require
   HomeegramAccessory = require('./accessories/HomeegramAccessory.js')(Service, Characteristic);
   // eslint-disable-next-line global-require
   RgbLightbulbAccessory = require('./accessories/RgbLightbulbAccessory.js')(Service, Characteristic);
+  // eslint-disable-next-line global-require
+  WindowCoveringAccessory = require('./accessories/WindowCoveringAccessory.js')(Service, Characteristic);
 
   homebridge.registerPlatform('homebridge-homee', 'homee', HomeePlatform, false);
 };
