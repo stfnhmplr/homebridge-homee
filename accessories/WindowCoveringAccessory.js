@@ -65,7 +65,7 @@ class WindowCoveringAccessory {
     const informationService = new Service.AccessoryInformation();
 
     informationService
-      .setCharacteristic(Characteristic.Manufacturer, 'Homee')
+      .setCharacteristic(Characteristic.Manufacturer, 'homee')
       .setCharacteristic(Characteristic.Model, 'WindowCovering')
       .setCharacteristic(Characteristic.SerialNumber, '');
 

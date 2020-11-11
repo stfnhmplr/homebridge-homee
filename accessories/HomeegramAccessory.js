@@ -36,7 +36,7 @@ class HomeegramAccessory {
     const informationService = new Service.AccessoryInformation();
 
     informationService
-      .setCharacteristic(Characteristic.Manufacturer, 'Homee')
+      .setCharacteristic(Characteristic.Manufacturer, 'homee')
       .setCharacteristic(Characteristic.Model, 'Homeegram')
       .setCharacteristic(Characteristic.SerialNumber, '');
 
