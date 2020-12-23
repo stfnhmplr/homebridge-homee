@@ -28,7 +28,12 @@ class HomeePlatform {
      */
     constructor(log, config, api) {
         this.log = log;
-        this.homee = new Homee(config.host, config.user, config.pass);
+        this.homee = new Homee(
+          config.host,
+          config.user,
+          config.pass,
+          { device: config.deviceId || 'homebridge' },
+        );
         this.nodes = [];
         this.homeegrams = [];
         this.foundAccessories = [];

@@ -6,7 +6,7 @@ homee platform plugin for homebridge: https://github.com/nfarina/homebridge
 Follow the instruction in [NPM](https://www.npmjs.com/package/homebridge) for the homebridge server installation. The plugin is published through [NPM](https://www.npmjs.com/package/homebridge-homee) and should be installed "globally" by typing:
 
     sudo npm install -g homebridge-homee
-    
+
 Alternatively you could use [**homeean**](https://himpler.com/homeean) to install homebridge-homee (including Homebridge) on a Raspberry Pi with a plain vanilla Raspbian installation. homeean is a web based buildtool, which generates an individual buildscript (Bash-Script) for user selected Smart Home Tools to be installed on a Raspberry Pi running on Raspbian. homebridge-homee (including its dependecy Homebridge) is provided as an homeean install option.
 
 ## Configuration
@@ -32,10 +32,13 @@ Example:
                 "user": "your-username",
                 "pass": "your-password",
                 "groupName": "group-name",
-                "alarmGroup": "AlarmGroupName"
+                "alarmGroup": "AlarmGroupName",
+                "deviceId": "homebridge"
             }
         ]
     }
+
+If you use multiple instances of this plugin with the same homee, you have to specify a custom deviceId.
 
 ## Exclude nodes or homeegrams
 This plugin integrates all (known) devices to homebridge by default. You can limit the integration to certain devices by creating a group in homee and adding all the devices you want to use with homebridge. If not explicitly specified, the name of this group defaults to 'Homebridge'. It may be changed using the optional 'groupName' statement. Devices outside this group are ignored.
@@ -45,11 +48,11 @@ Homekit cannot manage more than 100 devices per bridge. If you have together mor
 
 ## Security System
 You can activate a security system. Just create an alarm group in homee and add it to your config file. Possible triggers are e.g. motion detectors, smoke detectors, leak detectors and so on. You can add as many triggers as you like. In combination with the presence status in homee, the selected sensors can trigger an alarm in HomeKit.
- 
+
  The manipulation alarm of the sensors is also transmitted to HomeKit.
- 
+
  Since the presence states cannot be matched one to one with homee, the following mapping is carried out:
- 
+
  | homee  | Homekit  |
  |---|---|
  | Home | Disarmed |

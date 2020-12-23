@@ -15,7 +15,8 @@
             "user": "your-username",
             "pass": "your-password",
             "groupName": "homebridge",
-            "alarmGroup": "Alarm"
+            "alarmGroup": "Alarm",
+            "deviceId": "homebridge"
         }
     ]
 }

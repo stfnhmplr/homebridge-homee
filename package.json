@@ -14,17 +14,11 @@
     "bugs": {
         "url": "http://github.com/stfnhmplr/homebridge-homee/issues"
     },
-    "prettier": {
-        "singleQuote": true,
-        "tabWidth": 4,
-        "trailingComma": true,
-        "printWidth": 120
-    },
     "engines": {
         "node": ">=6.0.0",
         "homebridge": ">=0.4.0"
     },
     "dependencies": {
-        "homee-api": "^0.11.1"
+        "homee-api": "^0.18.0"
     }
 }
