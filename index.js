@@ -190,7 +190,7 @@ class HomeePlatform {
             let attributes = message.node ? message.node.attributes : [message.attribute];
 
             for (let attribute of attributes) {
-                let accessory = this.foundAccessories.find(a => a.nodeId === attribute.node_id);
+                let accessory = this.foundAccessories.find(a => a.nodeId === attribute.node_id && (a.instance === attribute.instance || a.instance === 0));
                 if (accessory) {
                     accessory.updateValue(attribute);
                     this.log.info('Updated accessory %s', accessory.name);
