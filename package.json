@@ -19,6 +19,6 @@
         "homebridge": ">=0.4.0"
     },
     "dependencies": {
-        "homee-api": "^0.18.0"
+        "homee-api": "^0.21.1"
     }
 }
