@@ -34,14 +34,14 @@ Example:
                 "groupName": "group-name",
                 "alarmGroup": "AlarmGroupName",
                 "deviceId": "homebridge",
-                "disableRGB" : false,
-                "disableCT" : false,
-                "disableCTforRGB" : false,
-                "disableRGBforDevice" : [
+                "disableRGB" false,
+                "disableCT": false,
+                "disableCTforRGB": false,
+                "disableRGBforDevice": [
                     123,
                     456
                 ],
-                "disableCTforDevice" : [
+                "disableCTforDevice": [
                     666,
                     815,
                     4711
@@ -76,9 +76,9 @@ You can activate a security system. Just create an alarm group in homee and add 
 While this plugin supports "Lightbulb"-type fixtures with RGB color and/or color temperature controls, the color picker within the Home app has some issues with lights implementing both features at the same time. This behaviour is caused neither by homee nor by the plugin but is a flaw of the app itself. Some third-party apps, such as Eve, show no such erratic behaviour.
 
 Some configuration parameters allow you to precisely control the capabilities of some or all RGB or color temperature lights in HomeKit:
-- `"disableRGB" : true` removes the RGB color controls from **all** devices
-- `"disableCT" : true` removes the color temperature controls from **all** devices
-- `"disableCTforRGB" : true` removes the real color temperature controls from all RGB light fixtures. However, "fake" color temperature controls are still available. By using those controls, HomeKit emulates various color temperatures with the RGB LEDs but does not make any of the additional warm and cold white LEDs your fixture may feature.
+- `"disableRGB": true` removes the RGB color controls from *all* devices
+- `"disableCT": true` removes the color temperature controls from *all* devices
+- `"disableCTforRGB": true` removes the real color temperature controls from all RGB light fixtures. However, "fake" color temperature controls are still available. By using those controls, HomeKit emulates various color temperatures with the RGB LEDs but does not make any of the additional warm and cold white LEDs your fixture may feature.
 - By using the `"disableRGBforDevice"` statement, you may remove the RGB color controls from certain devices by adding their node IDs to the list. To find out the node ID of a device, you may open that device in the homee web application and check the browser address bar afterwards: e.g., `https://my.hom.ee/deviceslist/device/id/331` indicates a node ID of 331.
 - Likewise, you may use the `"disableCTforDevice"`statement to disable color temperature controls for specific devices.
 

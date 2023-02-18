@@ -17,14 +17,14 @@
             "groupName": "homebridge",
             "alarmGroup": "Alarm",
             "deviceId": "homebridge",
-            "disableRGB" : false,
-            "disableCT" : false,
-            "disableCTforRGB" : false,
-            "disableRGBforDevice" : [
+            "disableRGB": false,
+            "disableCT": false,
+            "disableCTforRGB": false,
+            "disableRGBforDevice": [
                 123,
                 456
             ],
-            "disableCTforDevice" : [
+            "disableCTforDevice": [
                 666,
                 815,
                 4711
