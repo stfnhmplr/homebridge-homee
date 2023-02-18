@@ -41,7 +41,7 @@ class HomeePlatform {
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
         this.alarmGroup = config.alarmGroup || null;
-        // limitations for RGB or color temperature lightbulbs
+        // inhibit RGB or color temperature controls for certain lightbulbs
         this.disableRGB = config.disableRGB || false;
         this.disableCT = config.disableCT || false;
         this.disableCTforRGB = config.disableCTforRGB || false;
@@ -157,7 +157,7 @@ class HomeePlatform {
         if (!groupId) {
             if (this.groupName !== 'homebridge') {
                 throw new Error(
-                    'Specified group not found. Aborting Homebridge startup to prevent lost of accessories'
+                    'Specified group not found. Aborting Homebridge startup to prevent loss of accessories'
                 );
             } else {
                 return [all.nodes, all.homeegrams];

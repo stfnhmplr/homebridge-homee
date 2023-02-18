@@ -73,7 +73,7 @@ You can activate a security system. Just create an alarm group in homee and add 
  | Holiday | Away Armed |
 
 ## RGB and Color Temperature Light Sources
-While this plugin supports "Lightbulb"-type fixtures with RGB color and/or color temperature controls, the color picker within the Home app has some issues with lights implementing both features at the same time. This behaviour is caused neither by homee nor by the plugin but is a flaw of the app itself. Some third-party apps, such as Eve, show no such erratic behaviour.
+While this plugin supports "Lightbulb"-type fixtures with RGB color and/or color temperature controls, the color picker within the genuine Home app has some issues with lights implementing both features at the same time. This behaviour is caused neither by homee nor by the plugin but is a flaw of the app itself. Some third-party apps, such as Eve, show no such erratic behaviour.
 
 Some configuration parameters allow you to precisely control the capabilities of some or all RGB or color temperature lights in HomeKit:
 - `"disableRGB": true` removes the RGB color controls from *all* devices

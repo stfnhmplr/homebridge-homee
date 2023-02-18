@@ -21,8 +21,7 @@
             "disableCT": false,
             "disableCTforRGB": false,
             "disableRGBforDevice": [
-                123,
-                456
+                123
             ],
             "disableCTforDevice": [
                 666,

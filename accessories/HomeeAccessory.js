@@ -19,6 +19,7 @@ class HomeeAccessory {
             this.hue = 0;            // will be updated with actual value right after service creation 
             this.saturation = 0;     // will be updated with actuel value right after service creation
             this.brightness = 100;   // brightness value currently fixed to 100% for color conversion as setting ignored by homee anyway (except for "dark" color names)
+            // inhibit RGB or color temperature controls for certain lightbulbs
             this.disableRGB = this.platform.disableRGB || this.platform.disableRGBforDevice.indexOf(this.nodeId) >= 0;
             this.disableCT = this.platform.disableCT || this.platform.disableCTforDevice.indexOf(this.nodeId) >= 0;
         }
