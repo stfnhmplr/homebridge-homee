@@ -41,6 +41,13 @@ class HomeePlatform {
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
         this.alarmGroup = config.alarmGroup || null;
+        // limitations for RGB or color temperature lightbulbs
+        this.disableRGB = config.disableRGB || false;
+        this.disableCT = config.disableCT || false;
+        this.disableCTforRGB = config.disableCTforRGB || false;
+        this.disableRGBforDevice = config.disableRGBforDevice || [];
+        this.disableCTforDevice = config.disableCTforDevice || [];
+
 
         if (api) this.api = api;
 
@@ -66,7 +73,7 @@ class HomeePlatform {
      * @param callback
      */
     accessories(callback) {
-        if (this.attempts > 10) {
+        if (this.attempts > 50) {   // In extreme cases a very high number of attempts is required (high-load situations and many accessories/homeegrams)
             throw new Error("Can't get devices or homeegrams. Please check that homee is online and your config is ok");
         }
 
