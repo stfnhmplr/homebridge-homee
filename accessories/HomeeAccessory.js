@@ -15,15 +15,28 @@ class HomeeAccessory {
         this.attributes = node.attributes;
         this.map = [];
         if (profile == 'Lightbulb') {
-            // provisions to cache HSB values for color lightbulbs as only one value is provided at a time by HomeKit
-            this.hue = 0;            // will be updated with actual value right after service creation 
-            this.saturation = 0;     // will be updated with actuel value right after service creation
-            this.brightness = 100;   // brightness value currently fixed to 100% for color conversion as setting ignored by homee anyway (except for "dark" color names)
-            // inhibit RGB or color temperature controls for certain lightbulbs
+            // Provisions to cache attributeIds for hue, saturation & color temperature (will be updated with actual values during service creation) - required for update after color mode change
+            // Note: this may cause issues if the lightbulb accessory features more than one separate color or color temperature attributes within homee (not aware of such devices at this time)
+            this.attributeIdHue = 0;
+            this.attributeIdSaturation = 0;
+            this.attributeIdColorTemperature = 0;
+            // Provisions to cache HSB & color temperature values for color lightbulbs (will be updated with actual value during service creation)
+            this.colorTemperature = 2000;
+            this.hue = 0;
+            this.saturation = 0;
+            this.brightness = 100;   // Brightness value currently fixed to 100% for color conversion as setting ignored by homee anyway (except for "dark" color names)
+            // Only transmit color value to homee when all color components have been received from HomeKit (prevents unwanted feedback of parameter not yet transmitted to homee)
+            this.hueUpdated = false;
+            this.saturationUpdated = false;
+            // Current color mode of homee [1 = RGB, 2 = color temperature] (will be updated with actual value during service creation)
+            this.colorMode = 1;
+            // Disable RGB or color temperature controls if desired for this accessory
             this.disableRGB = this.platform.disableRGB || this.platform.disableRGBforDevice.indexOf(this.nodeId) >= 0;
             this.disableCT = this.platform.disableCT || this.platform.disableCTforDevice.indexOf(this.nodeId) >= 0;
         }
     }
+
+
 
     setValue(value, callback, context, uuid, attributeId, attributeType) {
 
@@ -35,25 +48,46 @@ class HomeeAccessory {
         if (value === true) value = 1;
         if (value === false) value = 0;
 
-        // color temperature conversion HomeKit [MK-1] -> homee [K]
-        if (attributeType == 42) {
-            value = Math.min(Math.round(1000000 / value), 6535);
-        }
-
-        // special handling for hue/saturation values (provided only one at a time)
-        if (attributeType == 23) {
-            if (attributeId >= 100000) {
-                this.saturation = value;
-            } else {
-                this.hue = value;
-            }
-            value = HSBToColor(this.hue, this.saturation, this.brightness);   // conversion from updated & cachec HSB values to single RGB color value
-        }
-
-        // brightness value currently fixed to 100% for color conversion as setting ignored by homee anyway (except for "dark" color names)
+        // Brightness value currently fixed to 100% for color conversion as setting ignored by homee and HomeKit anyway (except for "dark" color names)
         // if (attributeType == 2 || attributeType == 61) this.brightness = value;
 
-        if (attributeId < 100000) {   // do not send data to homee when saturation has been updated by HomeKit (virtual attribute ID only, no direct link), this will be done when hue change is repoirted by HomeKit
+        // Special pre-processing for color temperature values
+        if (attributeType == 42) {
+            // Switch plugin to color temperature mode
+            this.colorMode = 2;
+            // Color temperature conversion HomeKit [MK-1] -> homee [K]
+            value = Math.min(Math.round(1000000 / value), 6535);
+            this.colorTemperature = value;
+            // Workaround for Home app's color picker (does not adjust to color temperature by itself but requires extrenal setting to corresponding color)
+            this.emulateColorTemperature(this.colorTemperature, this.attributeIdHue, this.attributeIdSaturation);
+        }
+
+        // Special handling for hue/saturation values (provided only one at a time)
+        if (attributeType == 23) {
+            if (attributeId < 100000) {
+                this.hue = value;
+                this.hueUpdated = true;
+            } else {
+                this.saturation = value;
+                this.saturationUpdated = true;
+            }
+            if (this.hueUpdated && this.saturationUpdated) {
+                // Switch plugin to rgb color mode
+                this.colorMode = 1;
+                // Conversion from updated & cached HSB values to single RGB color value
+                value = HSBToColor(this.hue, this.saturation, this.brightness);
+                this.log.debug('Setting ' + this.name + ' to ' + value);
+                if (attributeId < 100000) {
+                    this.homee.setValue(this.nodeId, attributeId, value);
+                } else {
+                    this.homee.setValue(this.nodeId, attributeId - 100000, value);
+                }
+                this.hueUpdated = false;
+                this.saturationUpdated = false;
+            }
+
+        // Regular handling for all other attributes
+        } else {
             this.log.debug('Setting ' + this.name + ' to ' + value);
             this.homee.setValue(this.nodeId, attributeId, value);
         }
@@ -61,47 +95,94 @@ class HomeeAccessory {
         callback(null, value);
     }
 
+
+
     updateValue(attribute) {
         if (this.service && attribute.id in this.map) {
             let attributeType = attributeTypes.getHAPTypeByAttributeType(attribute.type);
             let newValue = attribute.current_value;
-            let oldValue = this.service.getCharacteristic(this.map[attribute.id]).value;
+            if (attributeType == 'ColorMode') {
+                var oldValue = this.colorMode;
+            } else {
+                var oldValue = this.service.getCharacteristic(this.map[attribute.id]).value;
+            }
             let targetValue = attribute.target_value;
 
-            // color temperature conversion homee [K] -> HomeKit [MK-1]
-            if (attribute.type == 42) {
+            // Special handling for color temperature lightbulbs
+            if (attributeType == 'ColorTemperature') {
+                // Color temperature conversion homee [K] -> HomeKit [MK-1]
                 newValue = Math.round(1000000 / newValue);
                 targetValue = Math.round(1000000 / targetValue);
-            }
+                this.colorTemperature = newValue;
+                // Only set color temperature in HomeKit if plugin is in color temperature mode
+                if (this.colorMode == 2) {
+                    if (newValue !== oldValue && newValue === targetValue) {
+                        // Workaround for HomeKit color picker (does not adjust to color temperature by itself but requires extrenal setting to corresponding color)
+                        this.emulateColorTemperature(newValue, this.attributeIdHue, this.attributeIdSaturation);
+                        // Send color temperature to HomeKit
+                        this.service.getCharacteristic(this.map[attribute.id]).updateValue(newValue, null, 'ws');
+                        this.log.debug(this.name + ': ' + attributeType + ': ' + newValue);
+                    }
+                } else {
+                    this.log.debug('Not forwarding color temperature to HomeKit due to rgb color mode');
+                }
 
-            // special handling for color lightbulbs as single color value from homee must be split and sent to HomeKit as separate hue/saturation values
-            if (attribute.type == 23) {
+            // Special handling for RGB color lightbulbs as single color value from homee must be split and sent to HomeKit as separate hue/saturation values
+            } else if (attributeType == 'Color') {
+                // Calculating virtual attribute ID for saturation
                 let attributeIdHue = attribute.id;
-                let attributeIdSaturation = 100000 + attribute.id;   // calculating virtual attribute ID for saturation
-                let newHSB = colorToHSB(newValue);   // conversion from single RGB color value to array containing separate HSB values
+                let attributeIdSaturation = 100000 + attribute.id;
+                // Conversion from single RGB color value to array containing separate HSB values
+                let newHSB = colorToHSB(newValue);
+                let targetHSB = colorToHSB(targetValue);
                 let oldHue = oldValue;
                 let oldSaturation = this.service.getCharacteristic(this.map[attributeIdSaturation]).value;
-                let targetHSB = colorToHSB(targetValue);   // conversion from single RGB color value to array containing separate HSB values
-            
-                // sending hue value to HomeKit
-                if (newHSB[0] !== oldHue && newHSB[0] === targetHSB[0]) {
-                    this.service.getCharacteristic(this.map[attributeIdHue]).updateValue(newHSB[0], null, 'ws');
-                    this.hue = newHSB[0];
-                    this.log.debug(this.name + ': ' + attributeType + ' (Hue): ' + newHSB[0]);
+                
+
+                this.hue = newHSB[0];
+                this.saturation = newHSB[1];
+
+                if (this.colorMode == 1) {
+                    // Sending hue value to HomeKit
+                    if (newHSB[0] !== oldHue && newHSB[0] === targetHSB[0]) {
+                        this.service.getCharacteristic(this.map[attributeIdHue]).updateValue(this.hue, null, 'ws');
+                        this.log.debug(this.name + ': ' + attributeType + ' (Hue): ' + this.hue);
+                    }
+                    // Sending saturation value to HomeKit
+                    if (newHSB[1] !== oldSaturation && newHSB[1] === targetHSB[1]) {
+                        this.service.getCharacteristic(this.map[attributeIdSaturation]).updateValue(this.saturation, null, 'ws');
+                        this.log.debug(this.name + ': ' + attributeType + ' (Saturation): ' + this.saturation);
+                    }
+                } else {
+                    this.log.debug('Not forwarding hue & saturation to HomeKit due to color temperature mode');
                 }
 
-                // sending saturation value to HomeKit
-                if (newHSB[1] !== oldSaturation && newHSB[1] === targetHSB[1]) {
-                    this.service.getCharacteristic(this.map[attributeIdSaturation]).updateValue(newHSB[1], null, 'ws');
-                    this.saturation = newHSB[1];
-                    this.log.debug(this.name + ': ' + attributeType + ' (Saturation): ' + newHSB[1]);
+            // Handling for homee color mode change
+            } else if (attributeType == 'ColorMode') {
+                this.colorMode = newValue;
+                this.log.debug(this.name + ': ' + attributeType + ': ' + newValue + ' (not relayed to HomeKit)');
+
+                // If changed to color mode, send cached color to HomeKit as color mode is usually sent *after* color value by homee
+                if (!this.disableRGB && newValue != oldValue && newValue == 1) {
+                    this.service.getCharacteristic(this.map[this.attributeIdHue]).updateValue(this.hue, null, 'ws');
+                    this.log.debug(this.name + ': ' + attributeType + ' (Hue): ' + this.hue);
+                    this.service.getCharacteristic(this.map[this.attributeIdSaturation]).updateValue(this.saturation, null, 'ws');
+                    this.log.debug(this.name + ': ' + attributeType + ' (Saturation): ' + this.saturation);                }
+
+                // If changed to color temperature mode, send cached color temperature to HomeKit as color mode is usually sent *after* color temperature value by homee
+                if (!this.disableCT && newValue != oldValue && newValue == 2) {
+                    // Workaround for HomeKit color picker (does not adjust to color temperature by itself but requires extrenal setting to corresponding color)
+                    this.emulateColorTemperature(this.colorTemperature, this.attributeIdHue, this.attributeIdSaturation);
+                    // Send color temperature to HomeKit
+                    this.service.getCharacteristic(this.map[this.attributeIdColorTemperature]).updateValue(this.colorTemperature, null, 'ws');
+                    this.log.debug(this.name + ': ColorTemperature: ' + this.colorTemperature);
                 }
 
-            // handling for all other accessory types
+            // Regular handling for all other attributes
             } else {
                 if (newValue !== oldValue && newValue === targetValue) {
                     this.service.getCharacteristic(this.map[attribute.id]).updateValue(newValue, null, 'ws');
-                    /* brightness value currently fixed to 100% for color conversion as setting ignored by homee anyway (except for "dark" color names)
+                    /* Brightness value currently fixed to 100% for color conversion as setting ignored by homee anyway (except for "dark" color names)
                     if (attributeType == 'Brightness') {
                         this.brightness = newValue;
                     } */
@@ -110,6 +191,29 @@ class HomeeAccessory {
             }
         }
     }
+
+
+
+    // Workaround for HomeKit color picker (does not adjust to color temperature by itself but requires extrenal setting to corresponding color)
+    emulateColorTemperature(value, attributeIdHue, attributeIdSaturation) {
+        let rgb = [];
+        let colorTemperature = value;
+        if (colorTemperature < 1000) colorTemperature = 1000000 / colorTemperature;
+        colorTemperature = colorTemperature / 100;
+
+        // Conversion valid for color temperatures below 6,600 K (homee seems to be limited to 6,535 K)
+        rgb[0] = 255;
+        rgb[1] = Math.max(0, Math.min(255, (99.4708025861 * Math.log(colorTemperature)) - 161.1195681661));
+        rgb[2] = Math.max(0, Math.min(255, (138.5177312231 * Math.log(colorTemperature - 10)) - 305.0447927307));
+        let hsb = RGBToHSB(rgb);
+
+        this.hue = hsb[0];
+        this.saturation = hsb[1];
+        this.service.getCharacteristic(this.map[attributeIdHue]).updateValue(this.hue, null, 'ws');
+        this.service.getCharacteristic(this.map[attributeIdSaturation]).updateValue(this.saturation, null, 'ws');
+    }
+
+
 
     getServices() {
         let informationService = new Service.AccessoryInformation();
@@ -132,69 +236,95 @@ class HomeeAccessory {
             // ensure that characteristic 'On' is unique --> Fibaro FGS 213
             if (attributeType === 'On' && this.map.indexOf(Characteristic.On) > -1) continue;
 
-            // skip attribute addition in case the color or color temperature controls are not desired
+            // Skip attribute addition in case the color or color temperature controls are not desired
             if (attributeType == 'Color' && this.disableRGB) continue;
             if (attributeType == 'ColorTemperature' && this.disableCT) continue;
 
             if (attributeType) {
                 this.log.debug(attributeType + ': ' + attribute.current_value);
 
-                // special handling for color lightbulbs as single color value from homee must be split and sent to HomeKit as separate hue/saturation values
+                // Special handling for color lightbulbs as single color value from homee must be split and sent to HomeKit as separate hue/saturation values
                 if (attributeType == 'Color') {
-                    // prevent subsequent addition of color temperature in case this is not desired for color lightbulbs
+                    // Prevent potential addition of color temperature in case this is not desired for color lightbulbs
                     this.disableCT = this.disableCT || this.platform.disableCTforRGB;
+                    // Calculation of current HSB values for device initialization
+                    let currentHSB = colorToHSB(attribute.current_value);
+                    this.hue = currentHSB[0];
+                    this.saturation = currentHSB[1];    
 
-                    // hue section (using real attribute ID)
+                    // *** Hue section (using real attribute ID)
                     attributeType = 'Hue';
-                    this.map[attribute.id] = Characteristic[attributeType];
+                    // Cache attributeId for hue
+                    this.attributeIdHue = attributeId;
+                    this.map[this.attributeIdHue] = Characteristic[attributeType];
 
                     if (!this.service.getCharacteristic(Characteristic[attributeType])) {
                         this.service.addCharacteristic(Characteristic[attributeType]);
                     }
 
-                    this.service.getCharacteristic(Characteristic[attributeType]).updateValue(attribute.current_value);
+                    // Only initialize hue value if accessory is in RGB mode
+                    if (this.colorMode == 1) {
+                        this.service.getCharacteristic(Characteristic[attributeType]).updateValue(this.hue);
+                        this.log.debug(' -> ' + attributeType + ': ' + this.hue);
+                    }
 
                     if (attribute.editable) {
                         this.service.getCharacteristic(Characteristic[attributeType]).on(
                             'set',
                             function() {
                                 var args = Array.prototype.slice.call(arguments);
-                                args.push(attributeId, attribute.type);
+                                args.push(this.attributeIdHue, attribute.type);
                                 this.setValue.apply(this, args);
                             }.bind(this)
                         );
                     }
 
-                    // hue section (using virtual attribute ID at hue attribute ID + 100,000)
+                    // *** Saturation section (using virtual attribute ID at hue attribute ID + 100,000)
                     attributeType = 'Saturation';
-                    this.map[100000 + attribute.id] = Characteristic[attributeType];
+                    // Cache attributeId for saturation
+                    this.attributeIdSaturation = 100000 + attributeId;
+                    this.map[this.attributeIdSaturation] = Characteristic[attributeType];
 
                     if (!this.service.getCharacteristic(Characteristic[attributeType])) {
                         this.service.addCharacteristic(Characteristic[attributeType]);
                     }
 
-                    this.service.getCharacteristic(Characteristic[attributeType]).updateValue(attribute.current_value);
+                    // Only initialize saturation value if accessory is in RGB mode
+                    if (this.colorMode == 1) {
+                        this.service.getCharacteristic(Characteristic[attributeType]).updateValue(this.saturation);
+                        this.log.debug(' -> ' + attributeType + ': ' + this.saturation);
+                    }
 
                     if (attribute.editable) {
                         this.service.getCharacteristic(Characteristic[attributeType]).on(
                             'set',
                             function() {
                                 var args = Array.prototype.slice.call(arguments);
-                                args.push(100000 + attributeId, attribute.type);
+                                args.push(this.attributeIdSaturation, attribute.type);
                                 this.setValue.apply(this, args);
                             }.bind(this)
                         );
                     }
 
-                // handling for all other accessory types
+                // Handling for color mode (no characteristic created, only internal status is updated according to homee color mode)
+                } else if (attributeType == 'ColorMode') {
+                    this.map[attribute.id] = Characteristic[attributeType];
+                    this.colorMode = attribute.current_value;
+
+                // Handling for all other accessory types
                 } else {
                     this.map[attribute.id] = Characteristic[attributeType];
+                    // Cache attributeId for color temperature
+                    if (attributeType == 'ColorTemperature') this.attributeIdColorTemperature = attribute.id;
 
                     if (!this.service.getCharacteristic(Characteristic[attributeType])) {
                         this.service.addCharacteristic(Characteristic[attributeType]);
                     }
 
-                    this.service.getCharacteristic(Characteristic[attributeType]).updateValue(attribute.current_value);
+                    // Only initialize color temperature value if accessory is in color temperature mode
+                    if (attributeType != 'ColorTemperature' || this.colorMode == 2) {
+                        this.service.getCharacteristic(Characteristic[attributeType]).updateValue(attribute.current_value);
+                    }
 
                     if (attribute.editable) {
                         this.service.getCharacteristic(Characteristic[attributeType]).on(
@@ -214,14 +344,23 @@ class HomeeAccessory {
     }
 }
 
-const colorToHSB = (color) => {
-    const r = ((color >> 16) & 0xFF) / 255;
-    const g = ((color >> 8) & 0xFF) / 255;
-    const b = (color & 0xFF) / 255;
+
+
+const RGBToHSB = (rgb) => {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
     const v = Math.max(r, g, b),
           n = v - Math.min(r, g, b);
     const h = n === 0 ? 0 : n && v === r ? (g - b) / n : v === g ? 2 + (b - r) / n : 4 + (r - g) / n;
     return [60 * (h < 0 ? h + 6 : h), v && (n / v) * 100, v * 100];
+};
+
+const colorToHSB = (color) => {
+    const r = ((color >> 16) & 0xFF) / 255;
+    const g = ((color >> 8) & 0xFF) / 255;
+    const b = (color & 0xFF) / 255;
+    return RGBToHSB([r, g, b]);
 };
 
 const HSBToColor = (h, s, b) => {

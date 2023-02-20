@@ -41,7 +41,7 @@ class HomeePlatform {
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
         this.alarmGroup = config.alarmGroup || null;
-        // inhibit RGB or color temperature controls for certain lightbulbs
+        // Inhibit RGB or color temperature controls for certain lightbulbs
         this.disableRGB = config.disableRGB || false;
         this.disableCT = config.disableCT || false;
         this.disableCTforRGB = config.disableCTforRGB || false;
