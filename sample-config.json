@@ -16,7 +16,18 @@
             "pass": "your-password",
             "groupName": "homebridge",
             "alarmGroup": "Alarm",
-            "deviceId": "homebridge"
+            "deviceId": "homebridge",
+            "disableRGB": false,
+            "disableCT": false,
+            "disableCTforRGB": false,
+            "disableRGBforDevice": [
+                123
+            ],
+            "disableCTforDevice": [
+                666,
+                815,
+                4711
+            ]
         }
     ]
 }

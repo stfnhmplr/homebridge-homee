@@ -41,6 +41,13 @@ class HomeePlatform {
         this.connected = false;
         this.groupName = config.groupName || 'homebridge';
         this.alarmGroup = config.alarmGroup || null;
+        // Inhibit RGB or color temperature controls for certain lightbulbs
+        this.disableRGB = config.disableRGB || false;
+        this.disableCT = config.disableCT || false;
+        this.disableCTforRGB = config.disableCTforRGB || false;
+        this.disableRGBforDevice = config.disableRGBforDevice || [];
+        this.disableCTforDevice = config.disableCTforDevice || [];
+
 
         if (api) this.api = api;
 
@@ -66,7 +73,7 @@ class HomeePlatform {
      * @param callback
      */
     accessories(callback) {
-        if (this.attempts > 10) {
+        if (this.attempts > 50) {   // In extreme cases a very high number of attempts is required (high-load situations and many accessories/homeegrams)
             throw new Error("Can't get devices or homeegrams. Please check that homee is online and your config is ok");
         }
 
@@ -150,7 +157,7 @@ class HomeePlatform {
         if (!groupId) {
             if (this.groupName !== 'homebridge') {
                 throw new Error(
-                    'Specified group not found. Aborting Homebridge startup to prevent lost of accessories'
+                    'Specified group not found. Aborting Homebridge startup to prevent loss of accessories'
                 );
             } else {
                 return [all.nodes, all.homeegrams];
