@@ -196,6 +196,9 @@ class HomeeAccessory {
 
     // Workaround for HomeKit color picker (does not adjust to color temperature by itself but requires extrenal setting to corresponding color)
     emulateColorTemperature(value, attributeIdHue, attributeIdSaturation) {
+	// Abort if this lightbulb has no hue/saturation characteristics
+	if (this.disableRGB) return;
+
         let rgb = [];
         let colorTemperature = value;
         if (colorTemperature < 1000) colorTemperature = 1000000 / colorTemperature;
